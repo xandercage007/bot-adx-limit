@@ -22,7 +22,15 @@ export const config = {
   universe: {
     quote: "USDT",
     topN: 100,
-    excludeSymbols: [], // e.g. ["DOGE/USDT:USDT"] to blacklist a symbol
+    excludeSymbols: [
+      "1000WHY/USDT:USDT",
+      "FXS/USDT:USDT",
+      "SLERF/USDT:USDT",
+      "BABY/USDT:USDT",
+      "1000SHIB/USDT:USDT",
+      "BTC/USDT:USDT",
+      "REZ/USDT:USDT",
+    ], // e.g. ["DOGE/USDT:USDT"] to blacklist a symbol
   },
 
   // --- Macro filters: decide DIRECTION only (long/short/no-trade). ---
