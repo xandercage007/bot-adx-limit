@@ -1,0 +1,16 @@
+{
+  "name": "binance-structure-futures-bot",
+  "version": "1.0.0",
+  "description": "Binance futures bot (via ccxt, Demo Trading): 1h+4h macro filters decide direction, a 5m Supertrend + candle-close layer times a LIMIT entry at 5m support/resistance, and market-structure-based SL/TP (swing high/low + ATR buffer, ADX-adjusted target, strict R:R filter) replace fixed ATR/percentage exits. Includes breakeven + time-based exit guardrails and a persistent win-rate trade log.",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "winrate": "node src/winrateReport.js"
+  },
+  "dependencies": {
+    "ccxt": "^4.3.0",
+    "technicalindicators": "^3.1.0",
+    "dotenv": "^16.4.5"
+  }
+}
