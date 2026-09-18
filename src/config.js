@@ -52,7 +52,7 @@ export const config = {
     pollSeconds: 20, // how often the entry-timing loop re-checks pending candidates
     maxWaitMinutes: 10, // give up on a queued candidate if it never confirms within this window
     limitLookback: 12, // 5m candles used to find the limit-entry support/resistance (~1h of 5m data)
-    limitFillTimeoutMinutes: 10, // cancel the limit entry order if it never fills within this window
+    limitFillTimeoutMinutes: 60, // cancel the limit entry order if it never fills within this window
     limitPollSeconds: 15, // how often to check whether a placed limit order has filled
   },
 
