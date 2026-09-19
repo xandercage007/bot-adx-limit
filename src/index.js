@@ -14,9 +14,11 @@ import { EntryQueue, startEntryTimingLoop } from "./entryTiming.js";
 import { startLimitEntryMonitor } from "./limitEntryManager.js";
 import { startOrphanOrderCleanup } from "./orderCleanup.js";
 import { validateCandidate } from "./riskManager.js";
+import { getGroqResult } from "./groq.js";
+import redis from "./redis.js";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
+await connectRedis();
 // Every scanIntervalMinutes: find macro-directional candidates and queue
 // them. Does NOT open any positions directly — that only happens once
 // entryTiming.js confirms the move on the fast (5m) timeframe and computes
@@ -29,11 +31,17 @@ async function runScanCycle(exchange, queue, getOpenPositions) {
   }
 
   const markets = await loadFuturesMarkets(exchange);
-  const symbols = await getTopVolumeSymbols(exchange, markets, config.universe.topN);
+  const symbols = await getTopVolumeSymbols(
+    exchange,
+    markets,
+    config.universe.topN,
+  );
   logger.info(`Scanning ${symbols.length} symbols (macro filters)...`);
 
   const candidates = await scanUniverse(exchange, symbols);
-  logger.info(`Found ${candidates.length} directional candidate(s) passing macro filters`);
+  logger.info(
+    `Found ${candidates.length} directional candidate(s) passing macro filters`,
+  );
 
   const openSymbols = new Set(openPositions.map((p) => p.symbol));
   const slotsAvailable = config.risk.maxOpenPositions - openPositions.length;
@@ -42,19 +50,46 @@ async function runScanCycle(exchange, queue, getOpenPositions) {
   for (const c of candidates) {
     if (queued >= slotsAvailable) break;
     if (openSymbols.has(c.symbol) || queue.has(c.symbol)) continue;
+
+    const signal = await getGroqResult(c);
+
+    const availableSignal = await redis.hVals("signal:ai");
+    if (!availableSignal.includes(c.symbol)) {
+      await redis.hSet("signal:ai", c.symbol, JSON.stringify(signal));
+    }
     queue.add(c);
     queued += 1;
   }
 
-  logger.info(`Queued ${queued} candidate(s) for ${config.entryTimeframe} entry confirmation.`);
+  logger.info(
+    `Queued ${queued} candidate(s) for ${config.entryTimeframe} entry confirmation.`,
+  );
 }
 
 async function main() {
-  logger.info(`Starting bot in ${config.mode.toUpperCase()} mode on ${config.exchange.id}`);
+  logger.info(
+    `Starting bot in ${config.mode.toUpperCase()} mode on ${config.exchange.id}`,
+  );
   if (config.mode === "live" && config.exchange.demoTrading) {
     logger.info("Demo Trading is ON — real order flow, Binance demo balance.");
   }
-
+  let telegramBot = null;
+  if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
+    try {
+      telegramBot = await Promise.race([
+        createTelegramBot(exchange),
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error("Telegram startup timed out after 5s")),
+            5000,
+          ),
+        ),
+      ]);
+      logger.info("Telegram bot started — 5-minute portfolio updates enabled.");
+    } catch (err) {
+      logger.warn("Telegram bot failed to start:", err.message);
+    }
+  }
   const exchange = createExchange();
   await exchange.loadMarkets();
 
@@ -76,7 +111,9 @@ async function main() {
     const openPositions = await getOpenPositions();
     const { valid, reasons } = validateCandidate(candidate, openPositions);
     if (!valid) {
-      logger.info(`${candidate.symbol}: confirmed but skipped — ${reasons.join("; ")}`);
+      logger.info(
+        `${candidate.symbol}: confirmed but skipped — ${reasons.join("; ")}`,
+      );
       return;
     }
 
@@ -117,7 +154,10 @@ async function main() {
             const t = await exchange.fetchTicker(pos.symbol);
             priceMap[pos.symbol] = t.last;
           } catch (err) {
-            logger.warn(`Could not fetch price for ${pos.symbol}:`, err.message);
+            logger.warn(
+              `Could not fetch price for ${pos.symbol}:`,
+              err.message,
+            );
           }
         }
         account.checkOpenPositions(priceMap);

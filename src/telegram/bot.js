@@ -1,0 +1,132 @@
+import { Bot, GrammyError, HttpError } from "grammy"; // ۱. افزودن کلاس‌های خطا
+import { config } from "../config.js";
+import { readPositions } from "../positionStore.js";
+import {
+  buildPortfolioSummary,
+  formatPortfolioSummary,
+  // getFuturesBalance,
+} from "./reportBuilder.js";
+import redis from "../redis.js";
+
+export class TradeTelegramBot {
+  constructor(exchange, options = {}) {
+    const token = options.token || process.env.TELEGRAM_BOT_TOKEN;
+    if (!token) {
+      throw new Error("TELEGRAM_BOT_TOKEN is not set");
+    }
+
+    this.exchange = exchange;
+    this.bot = new Bot(token);
+    this.chatId = options.chatId || process.env.TELEGRAM_CHAT_ID;
+    this.intervalMs = options.intervalMs || 5 * 60 * 1000;
+    this.reportTimer = null;
+    this.isReady = false;
+  }
+
+  async start() {
+    this.bot.command("start", async (ctx) => {
+      await ctx.reply(
+        "🤖 بات گزارش ترید فعال شد.\nهر 5 دقیقه وضعیت حساب و پوزیشن‌ها ارسال می‌شود.",
+      );
+    });
+
+    this.bot.command("status", async (ctx) => {
+      await ctx.reply(await this.buildReportMessage());
+    });
+
+    this.bot.command("ping", async (ctx) => {
+      await ctx.reply("pong");
+    });
+
+    this.bot.catch((err) => {
+      const ctx = err.ctx;
+      console.error(`Error while handling update ${ctx.update.update_id}:`);
+      const e = err.error;
+      if (e instanceof GrammyError) {
+        console.error("Error in request:", e.description);
+      } else if (e instanceof HttpError) {
+        console.error("Could not contact Telegram:", e);
+      } else {
+        console.error("Unknown error:", e);
+      }
+    });
+
+    // ۲. شروع روند Polling به صورت non-blocking
+    this.bot
+      .start({
+        onStart: (botInfo) => {
+          console.log(`Bot @${botInfo.username} started successfully.`);
+        },
+      })
+      .catch((err) => {
+        console.error("Bot polling error:", err);
+      });
+
+    this.isReady = true;
+    this.startPeriodicReport();
+  }
+
+  startPeriodicReport() {
+    if (this.reportTimer) {
+      clearInterval(this.reportTimer);
+    }
+
+    this.reportTimer = setInterval(async () => {
+      const report = await this.buildReportMessage();
+      console.log(report);
+
+      if (this.chatId) {
+        try {
+          await this.bot.api.sendMessage(this.chatId, report, {
+            parse_mode: "HTML",
+          });
+        } catch (err) {
+          console.error("Telegram send failed:", err.message);
+        }
+      }
+    }, this.intervalMs);
+  }
+
+  async buildReportMessage() {
+    // const records = readPositions();
+    // const balanceUsdt = await getFuturesBalance(this.exchange);
+    const signal = await redis.hVals("signal:ai");
+    const records = JSON.parse(signal);
+    const summary = records.map((item) => buildPortfolioSummary({ item }));
+    return formatPortfolioSummary(summary);
+  }
+
+  async sendNow() {
+    if (!this.chatId) {
+      return;
+    }
+
+    const message = await this.buildReportMessage();
+    await this.bot.api.sendMessage(this.chatId, message, {
+      parse_mode: "HTML",
+    });
+  }
+
+  async stop() {
+    if (this.reportTimer) {
+      clearInterval(this.reportTimer);
+      this.reportTimer = null;
+    }
+
+    if (this.isReady) {
+      await this.bot.stop();
+      this.isReady = false;
+    }
+  }
+}
+
+export async function createTelegramBot(exchange, configOverrides = {}) {
+  const bot = new TradeTelegramBot(exchange, {
+    token: process.env.TELEGRAM_BOT_TOKEN,
+    chatId: process.env.TELEGRAM_CHAT_ID,
+    ...configOverrides,
+  });
+
+  await bot.start();
+  return bot;
+}

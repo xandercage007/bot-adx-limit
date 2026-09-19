@@ -24,7 +24,7 @@ export function createExchange() {
   const ExchangeClass = ccxt[config.exchange.id];
   if (!ExchangeClass) {
     throw new Error(
-      `ccxt has no exchange id "${config.exchange.id}". Run "npm ls ccxt" and check ccxt.exchanges for the correct id.`
+      `ccxt has no exchange id "${config.exchange.id}". Run "npm ls ccxt" and check ccxt.exchanges for the correct id.`,
     );
   }
 
@@ -43,11 +43,13 @@ export function createExchange() {
     if (typeof exchange.enableDemoTrading !== "function") {
       throw new Error(
         "config.exchange.demoTrading is true but this ccxt version's binance class " +
-          "has no enableDemoTrading() method. Run `npm update ccxt` and confirm support."
+          "has no enableDemoTrading() method. Run `npm update ccxt` and confirm support.",
       );
     }
     exchange.enableDemoTrading(true);
-    logger.info("Binance demo trading mode ENABLED — orders go to Binance's demo environment.");
+    logger.info(
+      "Binance demo trading mode ENABLED — orders go to Binance's demo environment.",
+    );
   }
 
   return exchange;
@@ -68,7 +70,7 @@ export async function loadFuturesMarkets(exchange) {
   if (markets.length === 0) {
     logger.warn(
       `No perpetual markets with quote ${config.universe.quote} found. ` +
-        `Check config.exchange.defaultType and that Binance actually lists these on ccxt.`
+        `Check config.exchange.defaultType and that Binance actually lists these on ccxt.`,
     );
   }
 
@@ -81,7 +83,10 @@ export async function getTopVolumeSymbols(exchange, markets, topN) {
   try {
     tickers = await exchange.fetchTickers(symbols);
   } catch (err) {
-    logger.error("fetchTickers failed, falling back to unsorted market list:", err.message);
+    logger.error(
+      "fetchTickers failed, falling back to unsorted market list:",
+      err.message,
+    );
     return symbols.slice(0, topN);
   }
 
@@ -108,8 +113,11 @@ export async function fetchLastPrice(exchange, symbol) {
 // manual intervention, SL/TP fills you didn't see, etc).
 export async function fetchOpenPositions(exchange) {
   if (typeof exchange.fetchPositions !== "function") {
-    throw new Error("This ccxt exchange build has no fetchPositions() — cannot verify open positions safely.");
+    throw new Error(
+      "This ccxt exchange build has no fetchPositions() — cannot verify open positions safely.",
+    );
   }
+
   const positions = await exchange.fetchPositions();
   return positions.filter((p) => {
     const amt = p.contracts ?? p.contractSize ?? p.info?.positionAmt;
