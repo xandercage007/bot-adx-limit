@@ -92,8 +92,10 @@ export class TradeTelegramBot {
 
       if (this.chatId) {
         try {
-          await this.bot.api.sendMessage(this.chatId, report, {
-            parse_mode: "HTML",
+          report.forEach(async (item) => {
+            await this.bot.api.sendMessage(this.chatId, item, {
+              parse_mode: "HTML",
+            });
           });
         } catch (err) {
           console.error("Telegram send failed:", err.message);
