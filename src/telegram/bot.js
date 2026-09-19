@@ -1,6 +1,6 @@
 import { Bot, GrammyError, HttpError } from "grammy"; // ۱. افزودن کلاس‌های خطا
 import { config } from "../config.js";
-import { readPositions } from "../positionStore.js";
+// import { readPositions } from "../positionStore.js";
 import {
   buildPortfolioSummary,
   formatPortfolioSummary,
