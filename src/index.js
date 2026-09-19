@@ -75,26 +75,25 @@ async function main() {
   if (config.mode === "live" && config.exchange.demoTrading) {
     logger.info("Demo Trading is ON — real order flow, Binance demo balance.");
   }
-  let telegramBot = null;
-  if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
-    try {
-      telegramBot = await Promise.race([
-        createTelegramBot(exchange),
-        new Promise((_, reject) =>
-          setTimeout(
-            () => reject(new Error("Telegram startup timed out after 5s")),
-            5000,
-          ),
+}
+const exchange = createExchange();
+await exchange.loadMarkets();
+let telegramBot = null;
+if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
+  try {
+    telegramBot = await Promise.race([
+      createTelegramBot(exchange),
+      new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Telegram startup timed out after 5s")),
+          5000,
         ),
-      ]);
-      logger.info("Telegram bot started — 5-minute portfolio updates enabled.");
-    } catch (err) {
-      logger.warn("Telegram bot failed to start:", err.message);
-    }
+      ),
+    ]);
+    logger.info("Telegram bot started — 5-minute portfolio updates enabled.");
+  } catch (err) {
+    logger.warn("Telegram bot failed to start:", err.message);
   }
-  const exchange = createExchange();
-  await exchange.loadMarkets();
-
   const account = config.mode === "paper" ? new PaperAccount() : null;
   const trader = config.mode === "live" ? new LiveTrader(exchange) : null;
   const queue = new EntryQueue();
