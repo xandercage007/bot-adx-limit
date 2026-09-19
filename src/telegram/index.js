@@ -1,6 +1,6 @@
 export { TradeTelegramBot, createTelegramBot } from "./bot.js";
 export {
   buildPortfolioSummary,
-  // formatPortfolioSummary,
+  formatPortfolioSummary,
   // getFuturesBalance,
 } from "./reportBuilder.js";

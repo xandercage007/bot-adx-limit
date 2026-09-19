@@ -18,12 +18,13 @@ import { getGroqResult } from "./groq.js";
 import redis from "./redis.js";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-await connectRedis();
+
 // Every scanIntervalMinutes: find macro-directional candidates and queue
 // them. Does NOT open any positions directly — that only happens once
 // entryTiming.js confirms the move on the fast (5m) timeframe and computes
 // a valid structure-based SL/TP for it.
 async function runScanCycle(exchange, queue, getOpenPositions) {
+  await connectRedis();
   const openPositions = await getOpenPositions();
   if (openPositions.length >= config.risk.maxOpenPositions) {
     logger.info("Max open positions reached — skipping scan this cycle.");
