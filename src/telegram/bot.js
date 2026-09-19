@@ -31,7 +31,10 @@ export class TradeTelegramBot {
     });
 
     this.bot.command("status", async (ctx) => {
-      await ctx.reply(await this.buildReportMessage());
+      const msgs = await this.buildReportMessage();
+      msgs.forEach(async (item) => {
+        await ctx.reply(item, { parse_mode: "HTML" });
+      });
     });
 
     this.bot.command("ping", async (ctx) => {
@@ -93,8 +96,12 @@ export class TradeTelegramBot {
     const signal = await redis.hVals("signal:ai");
     console.log(">>>>>>>>>>>>>", signal);
 
-    const records = JSON.parse(signal);
-    const summary = records.map((item) => buildPortfolioSummary({ item }));
+    const records = signal.map((item) => JSON.parse(item));
+    console.log("<><><<<<<<<<<>>>>>>>>>>>", records);
+
+    const summary = records.map((item) =>
+      buildPortfolioSummary({ records: item }),
+    );
     return formatPortfolioSummary(summary);
   }
 

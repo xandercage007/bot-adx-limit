@@ -4,13 +4,15 @@ function toNumber(value, fallback = 0) {
 }
 
 export function buildPortfolioSummary({ records }) {
-  const { symbol, action, stopLoss, takeProfit, confidenc, reason } = records;
+  console.log("<><><><><>", records);
+
+  const { symbol, action, stopLoss, takeProfit, confidence, reason } = records;
   return {
     symbol,
     action,
     stopLoss,
     takeProfit,
-    confidenc,
+    confidence,
     reason,
   };
 }
@@ -41,12 +43,12 @@ export function formatPortfolioSummary(summary) {
   summary.forEach((item) => {
     result.push(
       [
-        "<b>📊 Signal/b>",
+        "<b>📊 Signal</b>",
         `SYMBOL: <b>${item.symbol}</b>`,
         `SIDE: <b>${item.action}</b>`,
         `SL: <b>${item.stopLoss}</b>`,
         `TP: <b>${item.takeProfit}</b>`,
-        `CONFIDENCE: <b>${item.confidenc}</b>`,
+        `CONFIDENCE: <b>${item.confidence}</b>`,
         `REASON: <b>${item.reason}</b>`,
         "",
         "<i>به‌روزرسانی هر 5 دقیقه</i>",

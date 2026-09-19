@@ -21,7 +21,7 @@ export const config = {
   // How many top-volume USDT-margined perpetuals to scan each cycle
   universe: {
     quote: "USDT",
-    topN: 200,
+    topN: 25,
     excludeSymbols: [
       "1000WHY/USDT:USDT",
       "FXS/USDT:USDT",

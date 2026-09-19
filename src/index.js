@@ -58,7 +58,11 @@ async function runScanCycle(exchange, queue, getOpenPositions) {
 
     const availableSignal = await redis.hVals("signal:ai");
     if (!availableSignal.includes(c.symbol)) {
-      await redis.hSet("signal:ai", c.symbol, JSON.stringify(signal));
+      await redis.hSet(
+        "signal:ai",
+        c.symbol,
+        JSON.stringify({ symbol: c.symbol, ...signal }),
+      );
     }
     queue.add(c);
     queued += 1;
