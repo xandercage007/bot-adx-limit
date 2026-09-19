@@ -17,7 +17,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /root/bot-adx-limit/
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+
+            cd /root/bot-adx-limit
             git pull
-            pnpm install 
+            pnpm install
             pm2 restart 0
