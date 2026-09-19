@@ -54,6 +54,7 @@ async function runScanCycle(exchange, queue, getOpenPositions) {
     if (openSymbols.has(c.symbol) || queue.has(c.symbol)) continue;
 
     const signal = await getGroqResult(c);
+    console.log("Trading Signal:", signal);
 
     const availableSignal = await redis.hVals("signal:ai");
     if (!availableSignal.includes(c.symbol)) {

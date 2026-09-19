@@ -36,7 +36,7 @@ Analyze the input market data and output strictly valid JSON in this format:
       ],
     });
     const signal = JSON.parse(response.choices[0].message.content);
-    console.log("Trading Signal:", signal);
+    // console.log("Trading Signal:", signal);
     await redis.set("signal-ai", JSON.stringify(signal));
     return signal;
     // اجرای سفارش براساس سیگنال دریافت شده

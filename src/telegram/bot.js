@@ -91,6 +91,8 @@ export class TradeTelegramBot {
     // const records = readPositions();
     // const balanceUsdt = await getFuturesBalance(this.exchange);
     const signal = await redis.hVals("signal:ai");
+    console.log(">>>>>>>>>>>>>", signal);
+
     const records = JSON.parse(signal);
     const summary = records.map((item) => buildPortfolioSummary({ item }));
     return formatPortfolioSummary(summary);
