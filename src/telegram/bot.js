@@ -32,6 +32,11 @@ export class TradeTelegramBot {
 
     this.bot.command("status", async (ctx) => {
       const msgs = await this.buildReportMessage();
+      if (!msgs || msgs.length === 0) {
+        await ctx.reply("هیچ سیگنالی برای گزارش وجود ندارد.");
+        return;
+      }
+
       msgs.forEach(async (item) => {
         await ctx.reply(item, { parse_mode: "HTML" });
       });
@@ -76,6 +81,13 @@ export class TradeTelegramBot {
 
     this.reportTimer = setInterval(async () => {
       const report = await this.buildReportMessage();
+      if (!report || report.length === 0) {
+        await this.bot.api.sendMessage(
+          this.chatId,
+          "هیچ سیگنالی برای گزارش وجود ندارد.",
+        );
+        return;
+      }
       console.log(report);
 
       if (this.chatId) {
@@ -93,16 +105,24 @@ export class TradeTelegramBot {
   async buildReportMessage() {
     // const records = readPositions();
     // const balanceUsdt = await getFuturesBalance(this.exchange);
-    const signal = await redis.hVals("signal:ai");
-    console.log(">>>>>>>>>>>>>", signal);
+    try {
+      const keys = await redis.keys("signal:*");
+      console.log(">>>>>>>>>>>>>", keys);
+      const values = await Promise.all(keys.map((key) => redis.get(key)));
+      console.log(">>>>>>>>>>>>>", values);
+      const data = values.filter(Boolean).map((value) => JSON.parse(value));
+      console.log(">>>>>>>>>>>>>", values);
 
-    const records = signal.map((item) => JSON.parse(item));
-    console.log("<><><<<<<<<<<>>>>>>>>>>>", records);
+      // const records = data.map((item) => JSON.parse(item));
+      console.log("<<<<<<<<<<<|>>>>>>>>>>>>", data);
 
-    const summary = records.map((item) =>
-      buildPortfolioSummary({ records: item }),
-    );
-    return formatPortfolioSummary(summary);
+      const summary = data.map((item) =>
+        buildPortfolioSummary({ records: item }),
+      );
+      return formatPortfolioSummary(summary);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async sendNow() {
@@ -110,9 +130,11 @@ export class TradeTelegramBot {
       return;
     }
 
-    const message = await this.buildReportMessage();
-    await this.bot.api.sendMessage(this.chatId, message, {
-      parse_mode: "HTML",
+    const messages = await this.buildReportMessage();
+    messages.forEach(async (item) => {
+      await this.bot.api.sendMessage(this.chatId, item, {
+        parse_mode: "HTML",
+      });
     });
   }
 

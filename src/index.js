@@ -54,15 +54,25 @@ async function runScanCycle(exchange, queue, getOpenPositions) {
     if (openSymbols.has(c.symbol) || queue.has(c.symbol)) continue;
 
     const signal = await getGroqResult(c);
-    console.log("Trading Signal:", signal);
-
-    const availableSignal = await redis.hVals("signal:ai");
-    if (!availableSignal.includes(c.symbol)) {
-      await redis.hSet(
-        "signal:ai",
-        c.symbol,
-        JSON.stringify({ symbol: c.symbol, ...signal }),
+    console.log("c.symbol:", c.symbol);
+    console.log("signal:", signal);
+    console.log("signal type:", typeof signal);
+    console.log("payload:", JSON.stringify({ symbol: c.symbol, ...signal }));
+    try {
+      const result = await redis.set(
+        `signal:${c.symbol}`,
+        JSON.stringify({
+          symbol: c.symbol,
+          ...signal,
+        }),
+        {
+          EX: 600,
+        },
       );
+
+      console.log("REDIS SET RESULT:", result);
+    } catch (error) {
+      console.error("REDIS SET ERROR:", error);
     }
     queue.add(c);
     queued += 1;

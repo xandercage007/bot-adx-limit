@@ -4,8 +4,6 @@ function toNumber(value, fallback = 0) {
 }
 
 export function buildPortfolioSummary({ records }) {
-  console.log("<><><><><>", records);
-
   const { symbol, action, stopLoss, takeProfit, confidence, reason } = records;
   return {
     symbol,

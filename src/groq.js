@@ -9,8 +9,6 @@ export const getGroqResult = async (data) => {
   delete data.candles;
   delete data.score;
   delete data.htTrend;
-  console.log(data);
-
   try {
     const response = await groq.chat.completions.create({
       model: "openai/gpt-oss-120b",
@@ -37,7 +35,7 @@ Analyze the input market data and output strictly valid JSON in this format:
     });
     const signal = JSON.parse(response.choices[0].message.content);
     // console.log("Trading Signal:", signal);
-    await redis.set("signal-ai", JSON.stringify(signal));
+    // await redis.set("signal-ai", JSON.stringify(signal));
     return signal;
     // اجرای سفارش براساس سیگنال دریافت شده
     if (signal.action === "BUY" && signal.confidence > 80) {
