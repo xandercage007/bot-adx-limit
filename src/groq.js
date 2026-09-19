@@ -1,7 +1,7 @@
 import "dotenv/config";
 import Groq from "groq-sdk";
 import fs from "fs";
-import redis from "./redis";
+import redis from "./redis.js";
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
