@@ -15,7 +15,7 @@ import { startLimitEntryMonitor } from "./limitEntryManager.js";
 import { startOrphanOrderCleanup } from "./orderCleanup.js";
 import { validateCandidate } from "./riskManager.js";
 import { getGroqResult } from "./groq.js";
-import redis from "./redis.js";
+import redis, { connectRedis } from "./redis.js";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
