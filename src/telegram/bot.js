@@ -45,7 +45,7 @@ export class TradeTelegramBot {
     this.bot.command("ping", async (ctx) => {
       await ctx.reply("pong");
     });
-    this.bot.api.setMyCommands([
+    await this.bot.api.setMyCommands([
       {
         command: "status",
         description: "Get all signals",
