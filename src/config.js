@@ -80,8 +80,8 @@ export const config = {
       minRR: 1.2, // reject the trade outright below this
       maxRR: null, // no upper cap by default — set a number to re-enable one
       adxTrendThreshold: 20, // below this, market is considered choppy/sideways
-      tpFractionTrending: 0.85, // % of distance to the swing level, when ADX is healthy
-      tpFractionChoppy: 0.7, // tighter target when ADX < adxTrendThreshold
+      tpFractionTrending: 0.75, // % of distance to the swing level, when ADX is healthy
+      tpFractionChoppy: 0.65, // tighter target when ADX < adxTrendThreshold
     },
 
     // --- Position management guardrails, checked every 1 minute ---

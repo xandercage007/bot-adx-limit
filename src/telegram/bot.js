@@ -82,13 +82,8 @@ export class TradeTelegramBot {
     this.reportTimer = setInterval(async () => {
       const report = await this.buildReportMessage();
       if (!report || report.length === 0) {
-        await this.bot.api.sendMessage(
-          this.chatId,
-          "هیچ سیگنالی برای گزارش وجود ندارد.",
-        );
         return;
       }
-      console.log(report);
 
       if (this.chatId) {
         try {
