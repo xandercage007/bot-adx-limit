@@ -52,12 +52,9 @@ async function runScanCycle(exchange, queue, getOpenPositions) {
   for (const c of candidates) {
     if (queued >= slotsAvailable) break;
     if (openSymbols.has(c.symbol) || queue.has(c.symbol)) continue;
+    const {symbol,adx,atr,direction,resistance,rsi,trend,support,volumeSpikeRatio}=c
+    const signal = await getGroqResult({symbol,adx,atr,direction,resistance,rsi,trend,support,volumeSpikeRatio});
 
-    const signal = await getGroqResult(c);
-    console.log("c.symbol:", c.symbol);
-    console.log("signal:", signal);
-    console.log("signal type:", typeof signal);
-    console.log("payload:", JSON.stringify({ symbol: c.symbol, ...signal }));
     try {
       const result = await redis.set(
         `signal:${c.symbol}`,

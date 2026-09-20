@@ -5,10 +5,17 @@ import redis from "./redis.js";
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
-export const getGroqResult = async (data) => {
-  delete data.candles;
-  delete data.score;
-  delete data.htTrend;
+export const getGroqResult = async ({
+  symbol,
+  adx,
+  atr,
+  direction,
+  resistance,
+  rsi,
+  trend,
+  support,
+  volumeSpikeRatio,
+}) => {
   try {
     const response = await groq.chat.completions.create({
       model: "openai/gpt-oss-120b",
@@ -29,7 +36,17 @@ Analyze the input market data and output strictly valid JSON in this format:
         },
         {
           role: "user",
-          content: JSON.stringify(data),
+          content: JSON.stringify({
+            symbol,
+            adx,
+            atr,
+            direction,
+            resistance,
+            rsi,
+            trend,
+            support,
+            volumeSpikeRatio,
+          }),
         },
       ],
     });
