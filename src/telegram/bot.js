@@ -45,7 +45,12 @@ export class TradeTelegramBot {
     this.bot.command("ping", async (ctx) => {
       await ctx.reply("pong");
     });
-
+    this.bot.api.setMyCommands([
+      {
+        command: "status",
+        description: "Get all signals",
+      },
+    ]);
     this.bot.catch((err) => {
       const ctx = err.ctx;
       console.error(`Error while handling update ${ctx.update.update_id}:`);
