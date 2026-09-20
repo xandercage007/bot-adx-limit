@@ -66,7 +66,7 @@ async function runScanCycle(exchange, queue, getOpenPositions) {
           ...signal,
         }),
         {
-          expiration: 600,
+          EX: 600,
         },
       );
 
