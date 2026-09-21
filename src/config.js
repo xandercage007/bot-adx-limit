@@ -77,7 +77,7 @@ export const config = {
       slLookback: 18, // 15-20 range per typical swing-stop practice
       tpLookback: 25, // 20-30 range for the resistance/support target
       slAtrBuffer: 0.5, // stop = swing level ± 0.5 × ATR
-      minRR: 1.1, // reject the trade outright below this
+      minRR: 1.2, // reject the trade outright below this
       maxRR: null, // no upper cap by default — set a number to re-enable one
       adxTrendThreshold: 20, // below this, market is considered choppy/sideways
       tpFractionTrending: 0.75, // % of distance to the swing level, when ADX is healthy
