@@ -28,7 +28,6 @@ export const config = {
       "SLERF/USDT:USDT",
       "BABY/USDT:USDT",
       "1000SHIB/USDT:USDT",
-      "BTC/USDT:USDT",
       "REZ/USDT:USDT",
     ], // e.g. ["DOGE/USDT:USDT"] to blacklist a symbol
   },
