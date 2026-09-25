@@ -11,9 +11,9 @@ export const config = {
   mode: "live",
 
   exchange: {
-    id: "binance",
-    defaultType: "future", // ccxt option: fetch USDT-M futures markets
-    demoTrading: true, // calls exchange.enableDemoTrading(true) — Binance's official demo/paper mode
+    id: "toobit",
+    defaultType: "swap", // ccxt option: fetch USDT-M futures markets
+    demoTrading: false, // calls exchange.enableDemoTrading(true) — Binance's official demo/paper mode
     defaultLeverage: 10, // affects position sizing/margin only — never the SL/TP levels themselves
     attachRealStopOrders: true, // place STOP_MARKET / TAKE_PROFIT_MARKET orders on the exchange itself
   },
@@ -59,7 +59,7 @@ export const config = {
     // --- Position sizing ---
     riskPerTradePercent: 1, // % of balance risked per trade — only used if fixedMarginPerTradeUSDT is null
     maxMarginPercentPerTrade: 0.2, // fallback cap as % of balance — only used if fixedMarginPerTradeUSDT is null
-    fixedMarginPerTradeUSDT: 100, // if set, every trade uses exactly this much margin (USDT), ignoring the % settings above
+    fixedMarginPerTradeUSDT: 50, // if set, every trade uses exactly this much margin (USDT), ignoring the % settings above
     maxOpenPositions: 3,
     maxLeverage: 10,
 
