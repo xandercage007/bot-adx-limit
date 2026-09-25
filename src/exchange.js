@@ -37,21 +37,7 @@ export function createExchange() {
       recvWindow: 60000,
     },
   });
-  // زمان سرور Toobit
-    const serverTime = await exchange.fetchTime();
 
-    // زمان سیستم VPS
-    const localTime = Date.now();
-
-    // اختلاف زمان
-    const timeDifference = serverTime - localTime;
-
-    console.log('Toobit server time:', serverTime);
-    console.log('Local time:', localTime);
-    console.log('Time difference:', timeDifference, 'ms');
-
-    // اعمال اختلاف ساعت در CCXT
-    exchange.options.timeDifference = timeDifference;
   // Binance's official demo/paper trading mode. Real order flow, fake money.
   // Requires API keys generated specifically for demo trading in the Binance UI.
   if (config.exchange.demoTrading) {
@@ -72,7 +58,21 @@ export function createExchange() {
 
 export async function loadFuturesMarkets(exchange) {
   await exchange.loadMarkets();
+  // زمان سرور Toobit
+  const serverTime = await exchange.fetchTime();
 
+  // زمان سیستم VPS
+  const localTime = Date.now();
+
+  // اختلاف زمان
+  const timeDifference = serverTime - localTime;
+
+  console.log("Toobit server time:", serverTime);
+  console.log("Local time:", localTime);
+  console.log("Time difference:", timeDifference, "ms");
+
+  // اعمال اختلاف ساعت در CCXT
+  exchange.options.timeDifference = timeDifference;
   const markets = Object.values(exchange.markets).filter((m) => {
     if (!m.active) return false;
     if (m.quote !== config.universe.quote) return false;
