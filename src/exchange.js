@@ -34,9 +34,24 @@ export function createExchange() {
     enableRateLimit: true,
     options: {
       defaultType: config.exchange.defaultType, // "future" -> USDT-M futures endpoints
+      recvWindow: 60000,
     },
   });
+  // زمان سرور Toobit
+    const serverTime = await exchange.fetchTime();
 
+    // زمان سیستم VPS
+    const localTime = Date.now();
+
+    // اختلاف زمان
+    const timeDifference = serverTime - localTime;
+
+    console.log('Toobit server time:', serverTime);
+    console.log('Local time:', localTime);
+    console.log('Time difference:', timeDifference, 'ms');
+
+    // اعمال اختلاف ساعت در CCXT
+    exchange.options.timeDifference = timeDifference;
   // Binance's official demo/paper trading mode. Real order flow, fake money.
   // Requires API keys generated specifically for demo trading in the Binance UI.
   if (config.exchange.demoTrading) {
