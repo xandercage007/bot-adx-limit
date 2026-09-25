@@ -59,8 +59,8 @@ export const config = {
     // --- Position sizing ---
     riskPerTradePercent: 1, // % of balance risked per trade — only used if fixedMarginPerTradeUSDT is null
     maxMarginPercentPerTrade: 0.2, // fallback cap as % of balance — only used if fixedMarginPerTradeUSDT is null
-    fixedMarginPerTradeUSDT: 50, // if set, every trade uses exactly this much margin (USDT), ignoring the % settings above
-    maxOpenPositions: 3,
+    fixedMarginPerTradeUSDT: 40, // if set, every trade uses exactly this much margin (USDT), ignoring the % settings above
+    maxOpenPositions: 2,
     maxLeverage: 10,
 
     // --- Structure-based SL/TP (src/structureRiskManager.js) ---
