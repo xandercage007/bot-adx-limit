@@ -26,7 +26,7 @@ export class EntryQueue {
     if (this.pending.has(candidate.symbol)) return;
     this.pending.set(candidate.symbol, { candidate, addedAt: Date.now() });
     logger.info(
-      `${candidate.symbol}: queued for ${config.entryTimeframe} entry confirmation (${candidate.direction})`
+      `${candidate.symbol}: queued for ${config.entryTimeframe} entry confirmation (${candidate.direction})`,
     );
   }
 
@@ -54,7 +54,12 @@ export class EntryQueue {
 // real fill price can differ from this limit price if the market moves
 // through it.
 async function checkConfirmation(exchange, symbol, candidate) {
-  const candles = await fetchOHLCV(exchange, symbol, config.entryTimeframe, config.entryCandleLimit);
+  const candles = await fetchOHLCV(
+    exchange,
+    symbol,
+    config.entryTimeframe,
+    config.entryCandleLimit,
+  );
   if (!candles || candles.length < 40) return null;
 
   const tfMs = timeframeToMs(config.entryTimeframe);
@@ -75,17 +80,25 @@ async function checkConfirmation(exchange, symbol, candidate) {
   if (!confirms) return null;
 
   const swing5m = findSwingLevels(closed, config.entry.limitLookback);
-  const limitPrice = direction === "long" ? swing5m.support : swing5m.resistance;
+  let limitPrice = direction === "long" ? swing5m.support : swing5m.resistance;
+  const currentPrice = last[4];
+  const maxDistance =
+    currentPrice * (config.entry.maxLimitDistancePercent / 100);
+
+  if (direction === "long" && currentPrice - limitPrice > maxDistance) {
+    limitPrice = currentPrice - maxDistance; // به‌جای سطح دور، نزدیک‌ترش کن
+  } else if (direction === "short" && limitPrice - currentPrice > maxDistance) {
+    limitPrice = currentPrice + maxDistance;
+  }
   if (!limitPrice) return null;
 
-  const { stopLoss, takeProfit, riskReward, isValid, reason } = computeStopTakeProfit(
-    direction,
-    limitPrice,
-    candidate
-  );
+  const { stopLoss, takeProfit, riskReward, isValid, reason } =
+    computeStopTakeProfit(direction, limitPrice, candidate);
 
   if (!isValid) {
-    logger.info(`${symbol}: confirmed on ${config.entryTimeframe} but structure risk rejected it — ${reason}`);
+    logger.info(
+      `${symbol}: confirmed on ${config.entryTimeframe} but structure risk rejected it — ${reason}`,
+    );
     return null;
   }
 
@@ -99,21 +112,27 @@ async function checkConfirmation(exchange, symbol, candidate) {
 // longer be fresh by then, so we don't chase it.
 export function startEntryTimingLoop(exchange, queue, onConfirmed) {
   const pollMs = config.entry.pollSeconds * 1000;
-  logger.info(`Entry timing loop started — polling every ${pollMs / 1000}s on ${config.entryTimeframe}`);
+  logger.info(
+    `Entry timing loop started — polling every ${pollMs / 1000}s on ${config.entryTimeframe}`,
+  );
 
   setInterval(async () => {
     for (const [symbol, { candidate, addedAt }] of queue.pending.entries()) {
       const waitedMs = Date.now() - addedAt;
       if (waitedMs > config.entry.maxWaitMinutes * 60 * 1000) {
         logger.info(
-          `${symbol}: entry confirmation window expired (${config.entry.maxWaitMinutes}min) — discarding.`
+          `${symbol}: entry confirmation window expired (${config.entry.maxWaitMinutes}min) — discarding.`,
         );
         queue.pending.delete(symbol);
         continue;
       }
 
       try {
-        const confirmation = await checkConfirmation(exchange, symbol, candidate);
+        const confirmation = await checkConfirmation(
+          exchange,
+          symbol,
+          candidate,
+        );
         if (!confirmation) continue;
 
         queue.pending.delete(symbol);
@@ -122,7 +141,7 @@ export function startEntryTimingLoop(exchange, queue, onConfirmed) {
         logger.trade(
           `${symbol}: ${config.entryTimeframe} entry CONFIRMED for ${candidate.direction} — ` +
             `limit=${confirmation.entry.toFixed(4)} SL=${confirmation.stopLoss.toFixed(4)} ` +
-            `TP=${confirmation.takeProfit.toFixed(4)} RR=${confirmation.riskReward.toFixed(2)}`
+            `TP=${confirmation.takeProfit.toFixed(4)} RR=${confirmation.riskReward.toFixed(2)}`,
         );
 
         await onConfirmed(finalCandidate);

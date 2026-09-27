@@ -29,8 +29,8 @@ export function createExchange() {
   }
 
   const exchange = new ExchangeClass({
-    apiKey: process.env.BINANCE_API_KEY || undefined,
-    secret: process.env.BINANCE_API_SECRET || undefined,
+    apiKey: process.env.TOOBIT_API_KEY || undefined,
+    secret: process.env.TOOBIT_SECRET_KEY || undefined,
     enableRateLimit: true,
     options: {
       defaultType: config.exchange.defaultType, // "future" -> USDT-M futures endpoints
