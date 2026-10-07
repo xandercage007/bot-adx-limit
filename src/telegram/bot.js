@@ -7,6 +7,7 @@ import {
   // getFuturesBalance,
 } from "./reportBuilder.js";
 import redis from "../redis.js";
+import { logger } from "../logger.js";
 
 export class TradeTelegramBot {
   constructor(exchange, options = {}) {
@@ -31,12 +32,11 @@ export class TradeTelegramBot {
     });
     this.bot.command("pos", async (ctx) => {
       const pos = await this.exchange.fetchPositions();
+      logger.info(">>>>>>", pos);
       if (pos.length == 0) return await ctx.reply("0 Pos");
-      pos
-        .filter((e) => e)
-        .forEach(async (p, i) => {
-          await ctx.reply(`Position: ${p}`);
-        });
+      pos.forEach(async (p, i) => {
+        await ctx.reply(`Position: ${JSON.stringify(p)}`);
+      });
     });
     this.bot.command("bal", async (ctx) => {
       const result = await this.exchange.fetchBalance();
