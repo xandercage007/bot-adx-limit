@@ -29,7 +29,15 @@ export class TradeTelegramBot {
         "🤖 بات گزارش ترید فعال شد.\nهر 5 دقیقه وضعیت حساب و پوزیشن‌ها ارسال می‌شود.",
       );
     });
-    this.bot.command("pos", async (ctx) => {});
+    this.bot.command("pos", async (ctx) => {
+      const pos = await this.exchange.fetchPositions();
+      if (pos.length == 0) return await ctx.reply("0 Pos");
+      pos
+        .filter((e) => e)
+        .forEach(async (p, i) => {
+          await ctx.reply(`Position: ${p}`);
+        });
+    });
     this.bot.command("bal", async (ctx) => {
       const result = this.exchange.fetchBalance();
       await ctx.reply(
