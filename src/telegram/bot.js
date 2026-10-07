@@ -39,7 +39,7 @@ export class TradeTelegramBot {
         });
     });
     this.bot.command("bal", async (ctx) => {
-      const result = this.exchange.fetchBalance();
+      const result = await this.exchange.fetchBalance();
       await ctx.reply(
         `Balance : ${result.info[0].balance} || Available Balance : ${result.info[0].availableBalance}`,
       );
