@@ -128,6 +128,20 @@ export class LiveTrader {
         side,
         amount,
         price,
+        {
+          stopLoss: {
+            triggerPrice: this.exchange.priceToPrecision(
+              candidate.symbol,
+              candidate.stopLoss,
+            ),
+          },
+          takeProfit: {
+            triggerPrice: this.exchange.priceToPrecision(
+              candidate.symbol,
+              candidate.takeProfit,
+            ),
+          },
+        },
       );
       logger.trade(
         `LIVE LIMIT ENTRY placed: ${side} ${amount} ${candidate.symbol} @ ${price} | orderId=${entryOrder.id}`,

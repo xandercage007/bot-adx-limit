@@ -52,8 +52,28 @@ async function runScanCycle(exchange, queue, getOpenPositions) {
   for (const c of candidates) {
     if (queued >= slotsAvailable) break;
     if (openSymbols.has(c.symbol) || queue.has(c.symbol)) continue;
-    const {symbol,adx,atr,direction,resistance,rsi,trend,support,volumeSpikeRatio}=c
-    const signal = await getGroqResult({symbol,adx,atr,direction,resistance,rsi,trend,support,volumeSpikeRatio});
+    const {
+      symbol,
+      adx,
+      atr,
+      direction,
+      resistance,
+      rsi,
+      trend,
+      support,
+      volumeSpikeRatio,
+    } = c;
+    const signal = await getGroqResult({
+      symbol,
+      adx,
+      atr,
+      direction,
+      resistance,
+      rsi,
+      trend,
+      support,
+      volumeSpikeRatio,
+    });
 
     try {
       const result = await redis.set(
@@ -151,7 +171,7 @@ if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
 
     // Every 30s: cancels orphaned SL/TP orders once their position has
     // already closed via the other one, and logs the trade result.
-    startOrphanOrderCleanup(exchange);
+    // startOrphanOrderCleanup(exchange);
   }
 
   while (true) {
