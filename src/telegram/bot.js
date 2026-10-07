@@ -58,9 +58,11 @@ export class TradeTelegramBot {
       },
       {
         command: "pos",
+        description: "Get all positions",
       },
       {
         command: "bal",
+        description: "Get all Balance",
       },
     ]);
     this.bot.catch((err) => {
