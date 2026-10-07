@@ -14,7 +14,7 @@ export function computeStopTakeProfit(direction, entryPrice, candidate) {
     candidate.atr,
     candidate.adx,
     direction,
-    config.risk.structure
+    config.risk.structure,
   );
 
   return {
@@ -37,15 +37,27 @@ export function computeStopTakeProfit(direction, entryPrice, candidate) {
 //     trade uses exactly this much margin, regardless of account balance; or
 //   - a % of the current balance (config.risk.maxMarginPercentPerTrade), if
 //     fixedMarginPerTradeUSDT is null.
-export function calcPositionSize(balance, entry, stopLoss, leverage) {
+export function calcPositionSize(
+  balance,
+  entry,
+  stopLoss,
+  leverage,
+  contractSize = 1,
+) {
   const riskAmount = balance * (config.risk.riskPerTradePercent / 100);
   const priceRisk = Math.abs(entry - stopLoss);
   if (priceRisk === 0) {
-    return { units: 0, notional: 0, marginRequired: 0, riskAmount: 0, cappedByMargin: false };
+    return {
+      units: 0,
+      notional: 0,
+      marginRequired: 0,
+      riskAmount: 0,
+      cappedByMargin: false,
+    };
   }
 
-  let units = riskAmount / priceRisk;
-  let notional = units * entry;
+  let units = riskAmount / priceRisk / contractSize;
+  let notional = units * entry * contractSize;
   let marginRequired = notional / leverage;
 
   const maxMarginForTrade =
@@ -78,7 +90,9 @@ export function validateCandidate(candidate, openPositions) {
   const reasons = [];
 
   if (openPositions.length >= config.risk.maxOpenPositions) {
-    reasons.push(`Max open positions (${config.risk.maxOpenPositions}) reached`);
+    reasons.push(
+      `Max open positions (${config.risk.maxOpenPositions}) reached`,
+    );
   }
   if (openPositions.some((p) => p.symbol === candidate.symbol)) {
     reasons.push(`Already have an open position on ${candidate.symbol}`);
