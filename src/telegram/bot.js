@@ -34,7 +34,7 @@ export class TradeTelegramBot {
       const orders = await this.exchange.fetchOpenOrders();
       if (orders.length == 0) return await ctx.reply("0 ORDERS");
       orders.forEach(async (order) => {
-        await ctx.reply(`\`\`\`${JSON.stringify(order)}\n\`\`\``, {
+        await ctx.reply(`\`\`\`\n${order}\n\`\`\``, {
           parse_mode: "MarkdownV2",
         });
       });
@@ -44,7 +44,7 @@ export class TradeTelegramBot {
       logger.info(">>>>>>", pos);
       if (pos.length == 0) return await ctx.reply("0 Pos");
       pos.forEach(async (p, i) => {
-        await ctx.reply(`Position: \`\`\`${JSON.stringify(p)}\n\`\`\``, {
+        await ctx.reply(`Position: \`\`\`\n${JSON.stringify(p)}\n\`\`\``, {
           parse_mode: "MarkdownV2",
         });
       });
