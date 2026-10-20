@@ -32,6 +32,7 @@ export class TradeTelegramBot {
     });
     this.bot.command("orders", async (ctx) => {
       const orders = await this.exchange.fetchOpenOrders();
+      if (orders.length == 0) return await ctx.reply("0 ORDERS");
       orders.forEach(async (order) => {
         await ctx.reply(`\`\`\`${JSON.stringify(order)}\n\`\`\``, {
           parse_mode: "Markdown",
