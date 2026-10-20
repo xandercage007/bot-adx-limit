@@ -26,17 +26,19 @@ export function computeStopTakeProfit(direction, entryPrice, candidate) {
   };
 }
 
-// Position size in units of the base asset, sized so that if price hits
-// the stop-loss, the loss equals riskPerTradePercent% of account balance —
-// but capped so a single trade never uses more margin than allowed, even if
-// that means the actual $ risk ends up below the target (a tight stop
-// relative to price would otherwise blow the size up huge).
+// Position size, returned in the exchange's `amount` unit (contracts).
 //
-// The margin cap itself is either:
-//   - a fixed dollar amount (config.risk.fixedMarginPerTradeUSDT), if set — every
-//     trade uses exactly this much margin, regardless of account balance; or
-//   - a % of the current balance (config.risk.maxMarginPercentPerTrade), if
-//     fixedMarginPerTradeUSDT is null.
+// FIXED-MARGIN MODE (config.risk.fixedMarginPerTradeUSDT is a number):
+//   uses EXACTLY that much margin on every trade — regardless of account
+//   balance and regardless of how far the stop-loss is.
+//   notional = margin × leverage. The risk-% settings are ignored here.
+//
+// RISK-% MODE (fixedMarginPerTradeUSDT is null):
+//   sized so a stop-out loses riskPerTradePercent% of balance, with margin
+//   capped at maxMarginPercentPerTrade% of balance.
+//
+// `contractSize` converts between coin quantity and the exchange's amount
+// unit (1 for Binance linear futures; check exchange.market(symbol).contractSize).
 export function calcPositionSize(
   balance,
   entry,
@@ -44,7 +46,6 @@ export function calcPositionSize(
   leverage,
   contractSize = 1,
 ) {
-  const riskAmount = balance * (config.risk.riskPerTradePercent / 100);
   const priceRisk = Math.abs(entry - stopLoss);
   if (priceRisk === 0) {
     return {
@@ -56,15 +57,25 @@ export function calcPositionSize(
     };
   }
 
+  if (config.risk.fixedMarginPerTradeUSDT != null) {
+    const marginRequired = config.risk.fixedMarginPerTradeUSDT;
+    const notional = marginRequired * leverage;
+    const units = notional / (entry * contractSize);
+    return {
+      units,
+      notional,
+      marginRequired,
+      riskAmount: notional * (priceRisk / entry), // $ lost if the stop is hit
+      cappedByMargin: false,
+    };
+  }
+
+  const riskAmount = balance * (config.risk.riskPerTradePercent / 100);
   let units = riskAmount / priceRisk / contractSize;
   let notional = units * entry * contractSize;
   let marginRequired = notional / leverage;
 
-  const maxMarginForTrade =
-    config.risk.fixedMarginPerTradeUSDT != null
-      ? config.risk.fixedMarginPerTradeUSDT
-      : balance * config.risk.maxMarginPercentPerTrade;
-
+  const maxMarginForTrade = balance * config.risk.maxMarginPercentPerTrade;
   let cappedByMargin = false;
 
   if (marginRequired > maxMarginForTrade) {
@@ -79,7 +90,7 @@ export function calcPositionSize(
     units,
     notional,
     marginRequired,
-    riskAmount: units * priceRisk, // actual $ risk after any capping
+    riskAmount: units * contractSize * priceRisk, // actual $ risk after any capping
     cappedByMargin,
   };
 }

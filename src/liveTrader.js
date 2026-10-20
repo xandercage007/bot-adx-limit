@@ -85,6 +85,11 @@ export class LiveTrader {
       candidate.symbol,
       sizing.units,
     );
+    logger.info(
+      `${candidate.symbol}: sizing → margin≈${sizing.marginRequired.toFixed(2)} USDT, notional≈${sizing.notional.toFixed(2)} USDT, ` +
+        `leverage=${leverage}x, contractSize=${contractSize}, amount ${sizing.units} → rounded to ${amount} ` +
+        `(effective notional≈${(Number(amount) * candidate.entry * contractSize).toFixed(2)} USDT)`,
+    );
     if (Number(amount) <= 0) {
       logger.warn(
         `Skipping ${candidate.symbol}: position size rounds down to 0 at this precision.`,
