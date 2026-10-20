@@ -54,7 +54,7 @@ export class TradeTelegramBot {
     this.bot.command("bal", async (ctx) => {
       const result = await this.exchange.fetchBalance();
       const stringf = JSON.stringify(result);
-      await ctx.reply(`Balance : \`\`\`${stringf}\n\`\`\``, {
+      await ctx.reply(`Balance : \`\`\`\n${stringf}\n\`\`\``, {
         parse_mode: "Markdown",
       });
     });
