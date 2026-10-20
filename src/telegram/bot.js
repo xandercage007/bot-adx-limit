@@ -45,14 +45,16 @@ export class TradeTelegramBot {
       logger.info(">>>>>>", pos);
       if (pos.length == 0) return await ctx.reply("0 Pos");
       pos.forEach(async (p, i) => {
-        await ctx.reply(`Position: \`\`\`\n${JSON.stringify(p)}\n\`\`\``, {
+        const stringf = JSON.stringify(p);
+        await ctx.reply(`Position: \`\`\`\n${stringf}\n\`\`\``, {
           parse_mode: "Markdown",
         });
       });
     });
     this.bot.command("bal", async (ctx) => {
       const result = await this.exchange.fetchBalance();
-      await ctx.reply(`Balance : \`\`\`${JSON.stringify(result)}\n\`\`\``, {
+      const stringf = JSON.stringify(result);
+      await ctx.reply(`Balance : \`\`\`${stringf}\n\`\`\``, {
         parse_mode: "Markdown",
       });
     });
