@@ -30,17 +30,25 @@ export class TradeTelegramBot {
         "🤖 بات گزارش ترید فعال شد.\nهر 5 دقیقه وضعیت حساب و پوزیشن‌ها ارسال می‌شود.",
       );
     });
+    this.bot.command("orders", async (ctx) => {
+      const orders = await this.exchange.fetchOpenOrders();
+      orders.forEach(async (order) => {
+        await ctx.reply(`\`\`\`${JSON.stringify(order)}\n\`\`\``, {
+          parse_mode: "Markdown",
+        });
+      });
+    });
     this.bot.command("pos", async (ctx) => {
       const pos = await this.exchange.fetchPositions();
       logger.info(">>>>>>", pos);
       if (pos.length == 0) return await ctx.reply("0 Pos");
       pos.forEach(async (p, i) => {
-        await ctx.reply(`Position: ${JSON.stringify(p)}`);
+        await ctx.reply(`Position: \`\`\`${JSON.stringify(p)}\n\`\`\``);
       });
     });
     this.bot.command("bal", async (ctx) => {
       const result = await this.exchange.fetchBalance();
-      await ctx.reply(`Balance : ${JSON.stringify(result)}`);
+      await ctx.reply(`Balance : \`\`\`${JSON.stringify(result)}\n\`\`\``);
     });
     this.bot.command("status", async (ctx) => {
       const msgs = await this.buildReportMessage();
@@ -69,6 +77,10 @@ export class TradeTelegramBot {
       {
         command: "bal",
         description: "Get all Balance",
+      },
+      {
+        command: "orders",
+        description: "get open orders",
       },
     ]);
     this.bot.catch((err) => {
