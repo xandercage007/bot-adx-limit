@@ -30,6 +30,34 @@ export class TradeTelegramBot {
         "🤖 بات گزارش ترید فعال شد.\nهر 5 دقیقه وضعیت حساب و پوزیشن‌ها ارسال می‌شود.",
       );
     });
+    this.bot.command("cancelord", async (ctx) => {
+      const orders = await exchange.fetchOpenOrders();
+
+      for (const order of orders) {
+        await exchange.cancelOrder(order.id, order.symbol);
+      }
+
+      await ctx.reply(`Cancelled ${orders.length} open orders.`);
+    });
+    this.bot.command("closepos", async (ctx) => {
+      const positions = await exchange.fetchPositions();
+
+      for (const p of positions) {
+        const amount = Number(p.contracts);
+        if (!amount) continue;
+
+        await exchange.createOrder(
+          p.symbol,
+          "market",
+          p.side === "long" ? "sell" : "buy",
+          amount,
+          undefined,
+          { reduceOnly: true },
+        );
+      }
+
+      await ctx.reply("Close orders submitted.");
+    });
     this.bot.command("orders", async (ctx) => {
       const orders = await this.exchange.fetchOpenOrders();
       if (orders.length == 0) return await ctx.reply("0 ORDERS");
@@ -90,6 +118,8 @@ export class TradeTelegramBot {
         command: "orders",
         description: "get open orders",
       },
+      { command: "closepos", description: "close all positions" },
+      { command: "cancelord", description: "cancel all orders" },
     ]);
     this.bot.catch((err) => {
       const ctx = err.ctx;
