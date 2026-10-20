@@ -31,22 +31,22 @@ export class TradeTelegramBot {
       );
     });
     this.bot.command("cancelord", async (ctx) => {
-      const orders = await exchange.fetchOpenOrders();
+      const orders = await this.exchange.fetchOpenOrders();
 
       for (const order of orders) {
-        await exchange.cancelOrder(order.id, order.symbol);
+        await this.exchange.cancelOrder(order.id, order.symbol);
       }
 
       await ctx.reply(`Cancelled ${orders.length} open orders.`);
     });
     this.bot.command("closepos", async (ctx) => {
-      const positions = await exchange.fetchPositions();
+      const positions = await this.exchange.fetchPositions();
 
       for (const p of positions) {
         const amount = Number(p.contracts);
         if (!amount) continue;
 
-        await exchange.createOrder(
+        await this.exchange.createOrder(
           p.symbol,
           "market",
           p.side === "long" ? "sell" : "buy",
