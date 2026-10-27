@@ -2,8 +2,12 @@ import { config } from "./config.js";
 import { logger } from "./logger.js";
 import { fetchOpenPositions, fetchOHLCV } from "./exchange.js";
 import { calcEMA, calcRSI } from "./technicalAnalysis.js";
-import { monitorPosition, checkProfitGatedReversal } from "./structureRiskManager.js";
+import {
+  monitorPosition,
+  checkProfitGatedReversal,
+} from "./structureRiskManager.js";
 import { getPositionDetails } from "./positionRegistry.js";
+import { Position } from "./models/Position.model.js";
 
 const CHECK_INTERVAL_MS = 60 * 1000; // 1 minute
 
@@ -47,7 +51,9 @@ function positionAmount(position) {
 //      losing trade can ONLY be closed by the hard stop-loss already
 //      resting on the exchange.
 export function startPositionMonitor(exchange, trader) {
-  logger.info(`Position monitor started — checking every ${CHECK_INTERVAL_MS / 1000}s`);
+  logger.info(
+    `Position monitor started — checking every ${CHECK_INTERVAL_MS / 1000}s`,
+  );
 
   const intervalId = setInterval(async () => {
     try {
@@ -64,12 +70,23 @@ export function startPositionMonitor(exchange, trader) {
         const details = getPositionDetails(pos.symbol);
         if (!details) continue; // no record of this position — leave it alone
 
-        const currentPrice = Number(pos.markPrice ?? pos.info?.markPrice ?? pos.entryPrice);
-
+        const currentPrice = Number(
+          pos.markPrice ?? pos.info?.markPrice ?? pos.entryPrice,
+        );
+        //Save position in db
+        // const positionData = Position.findOneAndUpdate()
+        logger.info(details);
+        //end of save position in db
         // --- 1 & 2: time exit + breakeven ---
         const mgmt = config.risk.management;
         const result = monitorPosition(
-          { side: direction, entry: details.entry, tp: details.tp, openedAt: details.openedAt, breakevenSet: details.breakevenSet },
+          {
+            side: direction,
+            entry: details.entry,
+            tp: details.tp,
+            openedAt: details.openedAt,
+            breakevenSet: details.breakevenSet,
+          },
           currentPrice,
           details.atr,
           {
@@ -77,7 +94,7 @@ export function startPositionMonitor(exchange, trader) {
             breakevenSLBufferAtr: mgmt.breakevenSLBufferAtr,
             maxHoldCandles: mgmt.maxHoldCandles,
             candleTimeframeMs: timeframeToMs(config.timeframe),
-          }
+          },
         );
 
         if (result.action === "CLOSE_MARKET") {
@@ -95,9 +112,17 @@ export function startPositionMonitor(exchange, trader) {
         // --- 3: profit-gated trend-reversal exit ---
         let candles;
         try {
-          candles = await fetchOHLCV(exchange, pos.symbol, config.timeframe, config.candleLimit);
+          candles = await fetchOHLCV(
+            exchange,
+            pos.symbol,
+            config.timeframe,
+            config.candleLimit,
+          );
         } catch (err) {
-          logger.warn(`Position monitor: could not fetch candles for ${pos.symbol}:`, err.message);
+          logger.warn(
+            `Position monitor: could not fetch candles for ${pos.symbol}:`,
+            err.message,
+          );
           continue;
         }
 
@@ -120,11 +145,13 @@ export function startPositionMonitor(exchange, trader) {
             profitAtrTrigger: mgmt.reversalProfitAtrTrigger,
             rsiLongExitMax: mgmt.reversalRsiLongExitMax,
             rsiShortExitMin: mgmt.reversalRsiShortExitMin,
-          }
+          },
         );
 
         if (reversal.shouldExit) {
-          logger.trade(`${pos.symbol}: profit-gated reversal exit — ${reversal.reason}. Closing now.`);
+          logger.trade(
+            `${pos.symbol}: profit-gated reversal exit — ${reversal.reason}. Closing now.`,
+          );
           const side = direction === "long" ? "buy" : "sell";
           await trader.closePosition(pos.symbol, side, amount);
         }

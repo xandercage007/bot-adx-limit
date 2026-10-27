@@ -34,7 +34,7 @@ export function createExchange() {
     enableRateLimit: true,
     options: {
       defaultType: config.exchange.defaultType, // "future" -> USDT-M futures endpoints
-      recvWindow: 60000,
+      recvWindow: 10000,
     },
   });
 

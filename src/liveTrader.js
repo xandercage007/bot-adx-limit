@@ -14,6 +14,9 @@ import {
 } from "./positionRegistry.js";
 import { trackLimitEntry } from "./limitEntryManager.js";
 import { appendTradeResult } from "./tradeHistory.js";
+import { Order } from "./models/Orders.model.js";
+import { Position } from "./models/Position.model.js";
+import { TechnicalsData } from "./models/TechnicalsData.model.js";
 
 // ------------------------------------------------------------------
 // Places REAL orders via ccxt. With config.exchange.demoTrading = true,
@@ -148,6 +151,42 @@ export class LiveTrader {
           },
         },
       );
+      const {
+        symbol,
+        adx,
+        atr,
+        direction,
+        resistance,
+        rsi,
+        trend,
+        support,
+        volumeSpikeRatio,
+      } = candidate;
+      const technicalsData = new TechnicalsData({
+        symbol,
+        adx,
+        atr,
+        direction,
+        resistance,
+        rsi,
+        trend,
+        support,
+        volumeSpikeRatio,
+      });
+
+      const order = new Order({
+        entryPrice: price,
+        amount,
+        symbol: candidate.symbol,
+        orderId: entryOrder.id,
+        takeProfit: candidate.takeProfit,
+        stopLoss: candidate.stopLoss,
+        side,
+        technicalsData: technicalsData.id,
+      });
+
+      await order.save();
+      await technicalsData.save();
       logger.trade(
         `LIVE LIMIT ENTRY placed: ${side} ${amount} ${candidate.symbol} @ ${price} | orderId=${entryOrder.id}`,
       );

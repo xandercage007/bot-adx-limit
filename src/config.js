@@ -21,7 +21,7 @@ export const config = {
   // How many top-volume USDT-margined perpetuals to scan each cycle
   universe: {
     quote: "USDT",
-    topN: 100,
+    topN: 200,
     excludeSymbols: [
       "1000WHY/USDT:USDT",
       "FXS/USDT:USDT",
@@ -29,14 +29,15 @@ export const config = {
       "BABY/USDT:USDT",
       "1000SHIB/USDT:USDT",
       "REZ/USDT:USDT",
+      "T/USDT:USDT",
     ], // e.g. ["DOGE/USDT:USDT"] to blacklist a symbol
   },
 
   // --- Macro filters: decide DIRECTION only (long/short/no-trade). ---
   timeframe: "1h",
-  candleLimit: 200,
+  candleLimit: 100,
   htTimeframe: "4h",
-  htCandleLimit: 100,
+  htCandleLimit: 50,
   scanIntervalMinutes: 5, // how often the bot re-scans for new directional candidates
 
   // --- Entry timing: a fast confirmation + limit-price layer on 5m.
@@ -46,14 +47,14 @@ export const config = {
   //     buying a small pullback on longs, selling a small bounce on shorts
   //     — instead of chasing the current market price.
   entryTimeframe: "5m",
-  entryCandleLimit: 150,
+  entryCandleLimit: 100,
   entry: {
     pollSeconds: 20, // how often the entry-timing loop re-checks pending candidates
     maxWaitMinutes: 10, // give up on a queued candidate if it never confirms within this window
     limitLookback: 12, // 5m candles used to find the limit-entry support/resistance (~1h of 5m data)
     limitFillTimeoutMinutes: 60, // cancel the limit entry order if it never fills within this window
     limitPollSeconds: 15, // how often to check whether a placed limit order has filled
-    maxLimitDistancePercent: 0.3, // limit order
+    maxLimitDistancePercent: 0.6, // limit order
   },
 
   risk: {
@@ -74,10 +75,10 @@ export const config = {
     // sanity cap — null disables it), and the TP fraction shrinks
     // automatically in a choppy (low-ADX) market.
     structure: {
-      slLookback: 18, // 15-20 range per typical swing-stop practice
-      tpLookback: 25, // 20-30 range for the resistance/support target
+      slLookback: 20, // 15-20 range per typical swing-stop practice
+      tpLookback: 30, // 20-30 range for the resistance/support target
       slAtrBuffer: 0.5, // stop = swing level ± 0.5 × ATR
-      minRR: 0.8, // reject the trade outright below this
+      minRR: 0.4, // reject the trade outright below this
       maxRR: null, // no upper cap by default — set a number to re-enable one
       adxTrendThreshold: 20, // below this, market is considered choppy/sideways
       tpFractionTrending: 0.75, // % of distance to the swing level, when ADX is healthy
