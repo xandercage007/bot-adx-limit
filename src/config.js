@@ -37,7 +37,7 @@ export const config = {
   timeframe: "1h",
   candleLimit: 100,
   htTimeframe: "4h",
-  htCandleLimit: 50,
+  htCandleLimit: 100,
   scanIntervalMinutes: 5, // how often the bot re-scans for new directional candidates
 
   // --- Entry timing: a fast confirmation + limit-price layer on 5m.
@@ -75,8 +75,8 @@ export const config = {
     // sanity cap — null disables it), and the TP fraction shrinks
     // automatically in a choppy (low-ADX) market.
     structure: {
-      slLookback: 20, // 15-20 range per typical swing-stop practice
-      tpLookback: 30, // 20-30 range for the resistance/support target
+      slLookback: 17, // 15-20 range per typical swing-stop practice
+      tpLookback: 24, // 20-30 range for the resistance/support target
       slAtrBuffer: 0.5, // stop = swing level ± 0.5 × ATR
       minRR: 0.4, // reject the trade outright below this
       maxRR: null, // no upper cap by default — set a number to re-enable one
