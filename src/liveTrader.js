@@ -349,12 +349,14 @@ export class LiveTrader {
       const stopPrice = this.exchange.priceToPrecision(symbol, newSL);
       const stopOrder = await this.exchange.createOrder(
         symbol,
-        "STOP_MARKET",
+        "market",
         closeSide,
         details.amount,
         undefined,
         {
           stopPrice,
+          triggerPrice: stopPrice,
+          stopBy: "Last",
           reduceOnly: true,
         },
       );
