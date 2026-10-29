@@ -54,14 +54,14 @@ export const config = {
     limitLookback: 12, // 5m candles used to find the limit-entry support/resistance (~1h of 5m data)
     limitFillTimeoutMinutes: 60, // cancel the limit entry order if it never fills within this window
     limitPollSeconds: 15, // how often to check whether a placed limit order has filled
-    maxLimitDistancePercent: 1, // limit order
+    maxLimitDistancePercent: 2, // limit order
   },
 
   risk: {
     // --- Position sizing ---
     riskPerTradePercent: 1, // % of balance risked per trade — only used if fixedMarginPerTradeUSDT is null
     maxMarginPercentPerTrade: 0.2, // fallback cap as % of balance — only used if fixedMarginPerTradeUSDT is null
-    fixedMarginPerTradeUSDT: 20, // if set, every trade uses exactly this much margin (USDT), ignoring the % settings above
+    fixedMarginPerTradeUSDT: 18, // if set, every trade uses exactly this much margin (USDT), ignoring the % settings above
     maxOpenPositions: 2,
     maxLeverage: 10,
 
