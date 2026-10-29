@@ -3,7 +3,9 @@ import { config } from "../config.js";
 // import { readPositions } from "../positionStore.js";
 import {
   buildPortfolioSummary,
+  formatOrders,
   formatPortfolioSummary,
+  formatPosition,
   // getFuturesBalance,
 } from "./reportBuilder.js";
 import redis from "../redis.js";
@@ -61,6 +63,10 @@ export class TradeTelegramBot {
     this.bot.command("orders", async (ctx) => {
       const orders = await this.exchange.fetchOpenOrders();
       if (orders.length == 0) return await ctx.reply("0 ORDERS");
+      const result = formatOrders(orders);
+      result.forEach(async (item) => {
+        await ctx.reply(item, { parse_mode: "HTML" });
+      });
       orders.forEach(async (order) => {
         const stringf = JSON.stringify(order);
         await ctx.reply(`\`\`\`\n${stringf}\n\`\`\``, {
@@ -72,6 +78,10 @@ export class TradeTelegramBot {
       const pos = await this.exchange.fetchPositions();
       logger.info(">>>>>>", pos);
       if (pos.length == 0) return await ctx.reply("0 Pos");
+      const result = formatPosition(pos);
+      result.forEach(async (item) => {
+        await ctx.reply(item, { parse_mode: "HTML" });
+      });
       pos.forEach(async (p, i) => {
         const stringf = JSON.stringify(p);
         await ctx.reply(`Position: \`\`\`\n${stringf}\n\`\`\``, {
@@ -146,33 +156,33 @@ export class TradeTelegramBot {
       });
 
     this.isReady = true;
-    this.startPeriodicReport();
+    // this.startPeriodicReport();
   }
 
-  startPeriodicReport() {
-    if (this.reportTimer) {
-      clearInterval(this.reportTimer);
-    }
+  // startPeriodicReport() {
+  //   if (this.reportTimer) {
+  //     clearInterval(this.reportTimer);
+  //   }
 
-    this.reportTimer = setInterval(async () => {
-      const report = await this.buildReportMessage();
-      if (!report || report.length === 0) {
-        return;
-      }
+  //   this.reportTimer = setInterval(async () => {
+  //     const report = await this.buildReportMessage();
+  //     if (!report || report.length === 0) {
+  //       return;
+  //     }
 
-      if (this.chatId) {
-        try {
-          report.forEach(async (item) => {
-            await this.bot.api.sendMessage(this.chatId, item, {
-              parse_mode: "HTML",
-            });
-          });
-        } catch (err) {
-          console.error("Telegram send failed:", err.message);
-        }
-      }
-    }, this.intervalMs);
-  }
+  //     if (this.chatId) {
+  //       try {
+  //         report.forEach(async (item) => {
+  //           await this.bot.api.sendMessage(this.chatId, item, {
+  //             parse_mode: "HTML",
+  //           });
+  //         });
+  //       } catch (err) {
+  //         console.error("Telegram send failed:", err.message);
+  //       }
+  //     }
+  //   }, this.intervalMs);
+  // }
 
   async buildReportMessage() {
     // const records = readPositions();

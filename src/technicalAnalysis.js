@@ -156,8 +156,8 @@ export function assessDirection(candles) {
     direction,
     rsi,
     adx,
-    atr,        // 1h ATR — used by entryTiming.js to size the stop-loss
-    support,    // 1h swing low — stop-loss floor for longs
+    atr, // 1h ATR — used by entryTiming.js to size the stop-loss
+    support, // 1h swing low — stop-loss floor for longs
     resistance, // 1h swing high — stop-loss ceiling for shorts
     trend: trendUp ? "up" : trendDown ? "down" : "flat",
   };

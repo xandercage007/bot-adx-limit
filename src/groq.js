@@ -28,6 +28,7 @@ export const getGroqResult = async ({
 Analyze the input market data and output strictly valid JSON in this format:
 {
   "action": "BUY" | "SELL" | "HOLD",
+  "entryPrice": number,
   "stopLoss": number,
   "takeProfit": number,
   "confidence": number,

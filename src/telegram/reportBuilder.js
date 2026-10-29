@@ -4,7 +4,15 @@ function toNumber(value, fallback = 0) {
 }
 
 export function buildPortfolioSummary({ records }) {
-  const { symbol, action, stopLoss, takeProfit, confidence, reason } = records;
+  const {
+    symbol,
+    action,
+    stopLoss,
+    takeProfit,
+    confidence,
+    reason,
+    entryPrice,
+  } = records;
   return {
     symbol,
     action,
@@ -12,6 +20,7 @@ export function buildPortfolioSummary({ records }) {
     takeProfit,
     confidence,
     reason,
+    entryPrice,
   };
 }
 
@@ -44,7 +53,7 @@ export function formatPortfolioSummary(summary) {
         "<b>📊 Signal</b>",
         `SYMBOL: <b>${item.symbol}</b>`,
         `SIDE: <b>${item.action}</b>`,
-        `SL: <b>${item.stopLoss}</b>`,
+        `ENTRY: <b>${item.entryPrice}</b>``SL: <b>${item.stopLoss}</b>`,
         `TP: <b>${item.takeProfit}</b>`,
         `CONFIDENCE: <b>${item.confidence}</b>`,
         `REASON: <b>${item.reason}</b>`,
@@ -55,3 +64,38 @@ export function formatPortfolioSummary(summary) {
   });
   return result;
 }
+export const formatPosition = (pos = []) => {
+  const result = [];
+  pos.forEach((item) => {
+    result.push(
+      [
+        "<b> Position </b>",
+        `Symbol: <b>${item.symbol}</b>`,
+        `Side: <b>${item.side}</b>`,
+        `EntryPrice: <b>${item.entryPrice}</b>`,
+        `UnrealizedPnL: <b>${item.unrealizedPnL}</b>`,
+        `InitialMargin: <b>${item.initialMargin}</b>`,
+        `MarkPrice: <b>${item.markPrice}</b>`,
+        `Percentage: <b>${item.percentage}</b>`,
+      ].join("\n"),
+    );
+  });
+
+  return result;
+};
+export const formatOrders = (orders = []) => {
+  const result = [];
+  orders.forEach((item) => {
+    result.push(
+      [
+        "<b> Orders </b>",
+        `Symbol: <b>${item.info.symbol}</b>`,
+        `Side: <b>${item.info.side}</b>`,
+        `EntryPrice: <b>${item.info.price}</b>`,
+        `InitialMargin: <b>${item.info.marginLocked}</b>`,
+      ].join("\n"),
+    );
+  });
+
+  return result;
+};

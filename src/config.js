@@ -78,7 +78,7 @@ export const config = {
       slLookback: 17, // 15-20 range per typical swing-stop practice
       tpLookback: 24, // 20-30 range for the resistance/support target
       slAtrBuffer: 0.5, // stop = swing level ± 0.5 × ATR
-      minRR: 0.4, // reject the trade outright below this
+      minRR: 0.8, // reject the trade outright below this
       maxRR: null, // no upper cap by default — set a number to re-enable one
       adxTrendThreshold: 20, // below this, market is considered choppy/sideways
       tpFractionTrending: 0.75, // % of distance to the swing level, when ADX is healthy
@@ -107,7 +107,7 @@ export const config = {
       // Time-based exit — unconditional (can fire even at a loss, since
       // it's a structural "don't let this drag on" guard, not a reaction
       // to indicators).
-      maxHoldCandles: 6, // close at market if held this many 1h candles without hitting TP/breakeven
+      maxHoldCandles: 8, // close at market if held this many 1h candles without hitting TP/breakeven
     },
 
     minADX: 15, // macro (1h) filter — reject choppy/ranging markets from even being considered
