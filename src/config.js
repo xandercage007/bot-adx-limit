@@ -54,7 +54,7 @@ export const config = {
     limitLookback: 12, // 5m candles used to find the limit-entry support/resistance (~1h of 5m data)
     limitFillTimeoutMinutes: 60, // cancel the limit entry order if it never fills within this window
     limitPollSeconds: 15, // how often to check whether a placed limit order has filled
-    maxLimitDistancePercent: 0.6, // limit order
+    maxLimitDistancePercent: 1, // limit order
   },
 
   risk: {
