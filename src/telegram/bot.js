@@ -67,12 +67,12 @@ export class TradeTelegramBot {
       result.forEach(async (item) => {
         await ctx.reply(item, { parse_mode: "HTML" });
       });
-      orders.forEach(async (order) => {
-        const stringf = JSON.stringify(order);
-        await ctx.reply(`\`\`\`\n${stringf}\n\`\`\``, {
-          parse_mode: "Markdown",
-        });
-      });
+      // orders.forEach(async (order) => {
+      //   const stringf = JSON.stringify(order);
+      //   await ctx.reply(`\`\`\`\n${stringf}\n\`\`\``, {
+      //     parse_mode: "Markdown",
+      //   });
+      // });
     });
     this.bot.command("pos", async (ctx) => {
       const pos = await this.exchange.fetchPositions();
@@ -82,12 +82,12 @@ export class TradeTelegramBot {
       result.forEach(async (item) => {
         await ctx.reply(item, { parse_mode: "HTML" });
       });
-      pos.forEach(async (p, i) => {
-        const stringf = JSON.stringify(p);
-        await ctx.reply(`Position: \`\`\`\n${stringf}\n\`\`\``, {
-          parse_mode: "Markdown",
-        });
-      });
+      // pos.forEach(async (p, i) => {
+      //   const stringf = JSON.stringify(p);
+      //   await ctx.reply(`Position: \`\`\`\n${stringf}\n\`\`\``, {
+      //     parse_mode: "Markdown",
+      //   });
+      // });
     });
     this.bot.command("bal", async (ctx) => {
       const result = await this.exchange.fetchBalance();
