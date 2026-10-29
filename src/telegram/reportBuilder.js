@@ -73,7 +73,7 @@ export const formatPosition = (pos = []) => {
         `Symbol: <b>${item.symbol}</b>`,
         `Side: <b>${item.side}</b>`,
         `EntryPrice: <b>${item.entryPrice}</b>`,
-        `UnrealizedPnL: <b>${item.unrealizedPnL}</b>`,
+        `UnrealizedPnL: <b>${item.unrealizedPnl}</b>`,
         `InitialMargin: <b>${item.initialMargin}</b>`,
         `MarkPrice: <b>${item.markPrice}</b>`,
         `Percentage: <b>${item.percentage}</b>`,
