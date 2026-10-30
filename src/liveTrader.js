@@ -17,7 +17,8 @@ import { appendTradeResult } from "./tradeHistory.js";
 import { Order } from "./models/Orders.model.js";
 import { Position } from "./models/Position.model.js";
 import { TechnicalsData } from "./models/TechnicalsData.model.js";
-
+import { TradeTelegramBot } from "./telegram/bot.js";
+import { formatOrders } from "./telegram/reportBuilder.js";
 // ------------------------------------------------------------------
 // Places REAL orders via ccxt. With config.exchange.demoTrading = true,
 // these land in Binance's Demo Trading environment (real order flow,
@@ -151,6 +152,7 @@ export class LiveTrader {
           },
         },
       );
+
       const {
         symbol,
         adx,
@@ -184,7 +186,10 @@ export class LiveTrader {
         side,
         technicalsData: technicalsData.id,
       });
-
+      const formatOrder = formatOrders(order.filter());
+      formatOrder.forEach((item) => {
+        TradeTelegramBot.sendMessageBot(`New Order: \n ${item}`);
+      });
       await order.save();
       await technicalsData.save();
       logger.trade(

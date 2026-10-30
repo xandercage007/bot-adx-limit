@@ -10,8 +10,9 @@ import {
 } from "./reportBuilder.js";
 import redis from "../redis.js";
 import { logger } from "../logger.js";
-
+let activeBot = null;
 export class TradeTelegramBot {
+  static instance = null;
   constructor(exchange, options = {}) {
     const token = options.token || process.env.TELEGRAM_BOT_TOKEN;
     if (!token) {
@@ -24,6 +25,7 @@ export class TradeTelegramBot {
     this.intervalMs = options.intervalMs || 5 * 60 * 1000;
     this.reportTimer = null;
     this.isReady = false;
+    TradeTelegramBot.instance = this;
   }
 
   async start() {
@@ -231,8 +233,30 @@ export class TradeTelegramBot {
       this.isReady = false;
     }
   }
-}
 
+  static async sendMessageBot(msg = "") {
+    if (!TradeTelegramBot.instance) {
+      throw new Error("بات هنوز راه‌اندازی نشده است!");
+    }
+    await TradeTelegramBot.instance.bot.api.sendMessage(
+      TradeTelegramBot.instance.chatId,
+      msg,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: "Cancel", callback_data: "cancel_callback" }],
+          ],
+        },
+      },
+    );
+  }
+}
+export function getActiveBot() {
+  if (!activeBot) {
+    throw new Error("بات هنوز راه‌اندازی نشده است!");
+  }
+  return activeBot;
+}
 export async function createTelegramBot(exchange, configOverrides = {}) {
   const bot = new TradeTelegramBot(exchange, {
     token: process.env.TELEGRAM_BOT_TOKEN,
