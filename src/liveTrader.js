@@ -186,10 +186,10 @@ export class LiveTrader {
         side,
         technicalsData: technicalsData.id,
       });
-      const formatOrder = formatOrders(order.filter());
-      formatOrder.forEach((item) => {
-        TradeTelegramBot.sendMessageBot(`New Order: \n ${item}`);
-      });
+      // const formatOrder = formatOrders(order.filter());
+      // formatOrder.forEach((item) => {
+      //   TradeTelegramBot.sendMessageBot(`New Order: \n ${item}`);
+      // });
       await order.save();
       await technicalsData.save();
       logger.trade(
