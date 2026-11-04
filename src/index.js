@@ -26,8 +26,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // a valid structure-based SL/TP for it.
 async function runScanCycle(exchange, queue, getOpenPositions) {
   await connectRedis();
-  await connection().catch((err) => logger.error(err))
-      .then((res) => logger.info("Mongodb is connected"));
+  await connection()
+    .catch((err) => logger.error(err))
+    .then((res) => logger.info("Mongodb is connected"));
   const openPositions = await getOpenPositions();
   if (openPositions.length >= config.risk.maxOpenPositions) {
     logger.info("Max open positions reached — skipping scan this cycle.");

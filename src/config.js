@@ -107,7 +107,7 @@ export const config = {
       // Time-based exit — unconditional (can fire even at a loss, since
       // it's a structural "don't let this drag on" guard, not a reaction
       // to indicators).
-      maxHoldCandles: 8, // close at market if held this many 1h candles without hitting TP/breakeven
+      maxHoldCandles: 24, // close at market if held this many 1h candles without hitting TP/breakeven
     },
 
     minADX: 15, // macro (1h) filter — reject choppy/ranging markets from even being considered
