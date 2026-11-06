@@ -83,7 +83,7 @@ export class TradeTelegramBot {
         });
       });
     });
-    this.bot.callbackQuery("/^cancel:(.+)$/", async (ctx) => {
+    this.bot.callbackQuery(/^cancel:(.+)$/, async (ctx) => {
       const orderId = ctx.match[1];
 
       logger.info("order id >>>>>>>>>>>" + orderId);
