@@ -96,6 +96,7 @@ export class TradeTelegramBot {
         undefined,
         { reduceOnly: true },
       );
+      await ctx.answerCallbackQuery({ text: `Position canceled` });
     });
     this.bot.command("pos", async (ctx) => {
       const pos = await this.exchange.fetchPositions();
