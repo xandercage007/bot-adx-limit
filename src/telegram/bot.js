@@ -83,12 +83,12 @@ export class TradeTelegramBot {
         });
       });
     });
-    this.bot.callbackQuery(/^cancel:(.+)$/, async (ctx) => {
+    this.bot.callbackQuery(/^cancel:(.+):(.+)$/, async (ctx) => {
       const orderId = ctx.match[2];
+      const symbol = ctx.match[1];
+      logger.info("order id >>>>>>>>>>>" + orderId + symbol);
 
-      logger.info("order id >>>>>>>>>>>" + JSON.stringify(ctx));
-
-      await this.exchange.cancelOrder(orderId);
+      await this.exchange.cancelOrder(orderId, symbol);
       await ctx.answerCallbackQuery({ text: `Order canceled` });
     });
     this.bot.command("pos", async (ctx) => {
