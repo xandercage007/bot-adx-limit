@@ -260,17 +260,26 @@ export class LiveTrader {
       const tpPrice = this.exchange.priceToPrecision(symbol, levels.takeProfit);
 
       try {
-        stopOrder = await this.exchange.createOrder(
-          symbol,
-          "STOP_MARKET",
-          closeSide,
-          amount,
-          undefined,
-          {
-            stopPrice,
-            reduceOnly: true,
-          },
-        );
+        // stopOrder = await this.exchange.createOrder(
+        //   symbol,
+        //   "STOP_MARKET",
+        //   closeSide,
+        //   amount,
+        //   undefined,
+        //   {
+        //     stopPrice,
+        //     reduceOnly: true,
+        //   },
+        // );
+        stopOrder = await this.exchange.privatePostApiV2FuturesAlgoOrder({
+          symbol: symbol.replace(/[\/:]/g, "").replace(/USDT$/, ""),
+          side: closeSide.toUpperCase(),
+          positionSide: closeSide.toUpperCase(),
+          type: "STOP_MARKET",
+          stopPrice: stopPrice.toString(),
+          quantity: amount.toString(),
+          triggerBy: "MARK_PRICE",
+        });
         logger.trade(
           `LIVE SL SET: ${symbol} @ ${stopPrice} | orderId=${stopOrder.id}`,
         );
@@ -279,17 +288,26 @@ export class LiveTrader {
       }
 
       try {
-        tpOrder = await this.exchange.createOrder(
-          symbol,
-          "TAKE_PROFIT_MARKET",
-          closeSide,
-          amount,
-          undefined,
-          {
-            stopPrice: tpPrice,
-            reduceOnly: true,
-          },
-        );
+        // tpOrder = await this.exchange.createOrder(
+        //   symbol,
+        //   "TAKE_PROFIT_MARKET",
+        //   closeSide,
+        //   amount,
+        //   undefined,
+        //   {
+        //     stopPrice: tpPrice,
+        //     reduceOnly: true,
+        //   },
+        // );
+        tpOrder = await this.exchange.privatePostApiV2FuturesAlgoOrder({
+          symbol: symbol.replace(/\/|:USDT/g, ""),
+          side: closeSide.toUpperCase(),
+          positionSide: closeSide.toUpperCase(),
+          type: "TAKE_PROFIT_MARKET",
+          stopPrice: tpPrice.toString(),
+          quantity: amount.toString(),
+          triggerBy: "MARK_PRICE",
+        });
         logger.trade(
           `LIVE TP SET: ${symbol} @ ${tpPrice} | orderId=${tpOrder.id}`,
         );

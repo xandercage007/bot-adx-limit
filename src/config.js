@@ -120,7 +120,7 @@ export const config = {
     // ratio is entirely your choice; with only one set, the other side is
     // still structure-based and the RR gate still applies.
     stopLossPercent: 1.5, // e.g. 1.5 => SL 1.5% from entry
-    takeProfitPercent: 3, // e.g. 1.0 => TP 1.0% from entry
+    takeProfitPercent: null, // e.g. 1.0 => TP 1.0% from entry
 
     // --- Pin bar (hammer / shooting star) check on the last closed 1h candles ---
     pinBar: {
