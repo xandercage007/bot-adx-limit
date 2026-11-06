@@ -85,19 +85,16 @@ export const formatPosition = (pos = []) => {
   return result;
 };
 export const formatOrders = (orders = []) => {
-  const result = [];
-  orders.forEach((item) => {
-    result.push(
-      [
-        "<b> Orders </b>",
-        `Symbol: <b>${item.info.symbol}</b>`,
-        `Side: <b>${item.info.side}</b>`,
-        `EntryPrice: <b>${item.info.price}</b>`,
-        `InitialMargin: <b>${item.info.marginLocked}</b>`,
-      ].join("\n"),
-    );
-    result.push({ orderId: item.info.orderId });
-  });
+  return orders.map((item) => ({
+    text: [
+      "<b>Order</b>",
+      `Symbol: <b>${item.info.symbol}</b>`,
+      `Side: <b>${item.info.side}</b>`,
+      `EntryPrice: <b>${item.info.price}</b>`,
+      `InitialMargin: <b>${item.info.marginLocked}</b>`,
+    ].join("\n"),
 
-  return result;
+    orderId: item.id,
+    symbol: item.symbol,
+  }));
 };

@@ -68,21 +68,31 @@ export class TradeTelegramBot {
       if (orders.length == 0) return await ctx.reply("0 ORDERS");
       const result = formatOrders(orders);
       result.forEach(async (item) => {
-        logger.info(`>>>>>>>>>>>>>>>>${item}`);
-        await ctx.reply(item, {
+        await ctx.reply(item.text, {
           parse_mode: "HTML",
           reply_markup: {
-            inline_keyboard: [[{ text: "Cancel", callback_data: `cancel:` }]],
+            inline_keyboard: [
+              [
+                {
+                  text: `Cancel:${item.symbol}`,
+                  callback_data: `cancel:${item.orderId}`,
+                },
+              ],
+            ],
           },
         });
       });
     });
-    this.bot.callbackQuery("cancel_query", async (ctx) => {
-      await ctx.answerCallbackQuery({ text: `order canceled` });
+    this.bot.callbackQuery("/^cancel:(.+)$/", async (ctx) => {
+      const orderId = ctx.match[1];
+
+      logger.info("order id >>>>>>>>>>>" + orderId);
+
+      await this.exchange.cancelOrder(orderId);
+      await ctx.answerCallbackQuery({ text: `Order canceled` });
     });
     this.bot.command("pos", async (ctx) => {
       const pos = await this.exchange.fetchPositions();
-      logger.info(">>>>>>", pos);
       if (pos.length == 0) return await ctx.reply("0 Pos");
       const result = formatPosition(pos);
       result.forEach(async (item) => {
