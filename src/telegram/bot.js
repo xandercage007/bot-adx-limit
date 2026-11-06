@@ -68,6 +68,7 @@ export class TradeTelegramBot {
       if (orders.length == 0) return await ctx.reply("0 ORDERS");
       const result = formatOrders(orders);
       result.forEach(async (item) => {
+        logger.info(`>>>>>>>>>>>>>>>>${item}`);
         await ctx.reply(item, {
           parse_mode: "HTML",
           reply_markup: {
