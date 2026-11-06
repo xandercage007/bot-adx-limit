@@ -83,7 +83,7 @@ export class TradeTelegramBot {
       await this.exchange.cancelOrder(orderId, symbol);
       await ctx.answerCallbackQuery({ text: `Order canceled` });
     });
-    this.bot.callbackQuery(/^cancel:(.+):(.+):(.+)$/, async (ctx) => {
+    this.bot.callbackQuery(/^cancelP:(.+):(.+):(.+)$/, async (ctx) => {
       const symbol = ctx.match[1];
       const side = ctx.match[2];
       const amount = ctx.match[3];
@@ -109,7 +109,7 @@ export class TradeTelegramBot {
               [
                 {
                   text: "Cancel",
-                  callback_data: `cancel:${item.symbol}:${item.side}:${item.amount}`,
+                  callback_data: `cancelP:${item.symbol}:${item.side}:${item.amount}`,
                 },
               ],
             ],
