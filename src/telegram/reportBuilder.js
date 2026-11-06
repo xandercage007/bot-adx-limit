@@ -79,7 +79,7 @@ export const formatPosition = (pos = []) => {
     ].join("\n"),
     symbol: item.symbol,
     side: item.side,
-    amount: item.amount,
+    amount: item.contracts,
   }));
 
   return result;
