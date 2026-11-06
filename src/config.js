@@ -112,6 +112,33 @@ export const config = {
 
     minADX: 15, // macro (1h) filter — reject choppy/ranging markets from even being considered
     minVolumeSpike: 0.6, // macro (1h) filter — last candle volume vs recent average
+    // --- Manual SL/TP (optional, each side independent) ---
+    // A number > 0 = flat % distance from the entry price for that side.
+    // null = use the structure-based level (swing + ATR buffer / % of the
+    // distance to the next swing) exactly as before.
+    // If BOTH are numbers, the min/max RR gate above is skipped, since the
+    // ratio is entirely your choice; with only one set, the other side is
+    // still structure-based and the RR gate still applies.
+    stopLossPercent: 1.5, // e.g. 1.5 => SL 1.5% from entry
+    takeProfitPercent: 3, // e.g. 1.0 => TP 1.0% from entry
+
+    // --- Pin bar (hammer / shooting star) check on the last closed 1h candles ---
+    pinBar: {
+      enabled: true,
+      // What to do when a pin bar points AGAINST the trend setup (e.g. the
+      // setup says short but a bullish pin bar just printed at a new low):
+      //   "flip"  = take the pin bar's direction instead (long). It still has to
+      //             pass every other filter, including the 4h trend check, so a
+      //             flip is rejected if the 4h trend opposes it.
+      //   "block" = just skip the symbol.
+      onConflict: "flip",
+      recentCandles: 2, // the pin bar may be on any of the last N closed candles
+      minWickRatio: 0.6, // the long wick must be >= 60% of the candle's full range
+      maxOppositeWickRatio: 0.25, // ...and the opposite wick <= 25% of it
+      minRangeAtr: 0.8, // ignore small candles: range must be >= 0.8 x ATR
+      requireAtExtreme: true, // must print a new low (bullish) / high (bearish) vs the previous candles
+      extremeLookback: 20,
+    },
   },
 
   paper: {

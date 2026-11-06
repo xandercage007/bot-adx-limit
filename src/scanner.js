@@ -3,6 +3,9 @@ import {
   assessDirection,
   volumeSpikeRatio,
   higherTimeframeTrend,
+  detectPinBar,
+  closedOnly,
+  tfToMs,
 } from "./technicalAnalysis.js";
 import { config } from "./config.js";
 import { logger } from "./logger.js";
@@ -18,17 +21,43 @@ export async function scanSymbol(exchange, symbol) {
       exchange,
       symbol,
       config.timeframe,
-      config.candleLimit
+      config.candleLimit,
     );
     if (!candles || candles.length < 60) return null;
 
     const assessment = assessDirection(candles);
     if (!assessment) return null;
 
+    // --- Pin bar check: a hammer / shooting star on the last closed 1h candles can mean the trend is turning ---
+    const pinCfg = config.risk.pinBar;
+    const pin =
+      pinCfg && pinCfg.enabled
+        ? detectPinBar(closedOnly(candles, tfToMs(config.timeframe)), pinCfg)
+        : null;
+    if (pin) {
+      const againstSetup =
+        (assessment.direction === "short" && pin.type === "bullish") ||
+        (assessment.direction === "long" && pin.type === "bearish");
+      if (againstSetup) {
+        if (pinCfg.onConflict === "flip") {
+          const flipped = pin.type === "bullish" ? "long" : "short";
+          logger.info(
+            `${symbol}: ${pin.type} pin bar (${pin.candlesAgo} candle(s) ago) against the ${assessment.direction} setup — flipping to ${flipped}`,
+          );
+          assessment.direction = flipped;
+          assessment.pinBarFlip = true;
+        } else {
+          logger.info(
+            `${symbol}: rejected — ${pin.type} pin bar against the ${assessment.direction} setup`,
+          );
+          return null;
+        }
+      }
+    }
     // --- Filter 1: ADX — only consider symbols where the 1h market is trending ---
     if (assessment.adx == null || assessment.adx < config.risk.minADX) {
       logger.info(
-        `${symbol}: rejected — ADX ${assessment.adx?.toFixed?.(1) ?? "n/a"} below minimum ${config.risk.minADX} (choppy/ranging)`
+        `${symbol}: rejected — ADX ${assessment.adx?.toFixed?.(1) ?? "n/a"} below minimum ${config.risk.minADX} (choppy/ranging)`,
       );
       return null;
     }
@@ -37,13 +66,18 @@ export async function scanSymbol(exchange, symbol) {
     const volSpike = volumeSpikeRatio(candles);
     if (volSpike < config.risk.minVolumeSpike) {
       logger.info(
-        `${symbol}: rejected — volume spike ${volSpike.toFixed(2)}x below minimum ${config.risk.minVolumeSpike}x`
+        `${symbol}: rejected — volume spike ${volSpike.toFixed(2)}x below minimum ${config.risk.minVolumeSpike}x`,
       );
       return null;
     }
 
     // --- Filter 3: Higher-timeframe (4h) trend must not directly conflict ---
-    const htCandles = await fetchOHLCV(exchange, symbol, config.htTimeframe, config.htCandleLimit);
+    const htCandles = await fetchOHLCV(
+      exchange,
+      symbol,
+      config.htTimeframe,
+      config.htCandleLimit,
+    );
     if (!htCandles || htCandles.length < 60) return null;
 
     const htTrend = higherTimeframeTrend(htCandles);
@@ -53,7 +87,7 @@ export async function scanSymbol(exchange, symbol) {
 
     if (htConflicts) {
       logger.info(
-        `${symbol}: rejected — 1h setup is ${assessment.direction} but ${config.htTimeframe} trend is ${htTrend}`
+        `${symbol}: rejected — 1h setup is ${assessment.direction} but ${config.htTimeframe} trend is ${htTrend}`,
       );
       return null;
     }
@@ -75,6 +109,13 @@ export async function scanSymbol(exchange, symbol) {
       htTrend,
       volumeSpikeRatio: volSpike,
       score,
+      pinBar: pin
+        ? {
+            type: pin.type,
+            candlesAgo: pin.candlesAgo,
+            flipped: Boolean(assessment.pinBarFlip),
+          }
+        : null,
       candles, // raw 1h OHLCV — needed by structureRiskManager.js for its own swing-high/low lookbacks
     };
   } catch (err) {

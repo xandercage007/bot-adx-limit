@@ -162,3 +162,71 @@ export function assessDirection(candles) {
     trend: trendUp ? "up" : trendDown ? "down" : "flat",
   };
 }
+
+// ---- Pin bar (hammer / shooting star) detection -------------------------
+
+// Closed-candle helpers (distinct names so they can't clash with anything already in the project).
+export function tfToMs(tf) {
+  const unit = tf.slice(-1);
+  const n = parseInt(tf, 10);
+  const map = { m: 60 * 1000, h: 60 * 60 * 1000, d: 24 * 60 * 60 * 1000 };
+  return n * (map[unit] || map.h);
+}
+
+// Drops the still-forming candle (and anything else not yet closed).
+export function closedOnly(candles, timeframeMs) {
+  return candles.filter((c) => Date.now() >= c[0] + timeframeMs);
+}
+
+// Looks for a pin bar among the last `cfg.recentCandles` CLOSED candles (the
+// most recent one wins).
+//   bullish ("hammer"):        long LOWER wick, small body near the top
+//                              -> buyers rejected the lower prices
+//   bearish ("shooting star"): long UPPER wick, small body near the bottom
+//                              -> sellers rejected the higher prices
+// A pin bar only means something where it prints, so by default it must also
+// make a new extreme (bullish: lowest low, bearish: highest high) versus the
+// previous `cfg.extremeLookback` candles, and it is dropped once price has
+// CLOSED beyond its tail afterwards (the idea has failed).
+// Returns { type, candlesAgo, high, low } or null.
+export function detectPinBar(closed, cfg) {
+  const atr = calcATR(closed);
+  if (!atr) return null;
+  const n = closed.length;
+
+  for (let back = 0; back < cfg.recentCandles; back++) {
+    const i = n - 1 - back;
+    if (i < cfg.extremeLookback) break;
+
+    const [, open, high, low, close] = closed[i];
+    const range = high - low;
+    if (range <= 0 || range < cfg.minRangeAtr * atr) continue;
+
+    const upperWick = (high - Math.max(open, close)) / range;
+    const lowerWick = (Math.min(open, close) - low) / range;
+    let type = null;
+    if (lowerWick >= cfg.minWickRatio && upperWick <= cfg.maxOppositeWickRatio)
+      type = "bullish";
+    else if (
+      upperWick >= cfg.minWickRatio &&
+      lowerWick <= cfg.maxOppositeWickRatio
+    )
+      type = "bearish";
+    if (!type) continue;
+
+    if (cfg.requireAtExtreme) {
+      const before = closed.slice(i - cfg.extremeLookback, i);
+      if (type === "bullish" && low > Math.min(...before.map((c) => c[3])))
+        continue;
+      if (type === "bearish" && high < Math.max(...before.map((c) => c[2])))
+        continue;
+    }
+
+    const later = closed.slice(i + 1);
+    if (type === "bullish" && later.some((c) => c[4] < low)) continue;
+    if (type === "bearish" && later.some((c) => c[4] > high)) continue;
+
+    return { type, candlesAgo: back, high, low };
+  }
+  return null;
+}

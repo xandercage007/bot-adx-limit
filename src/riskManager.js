@@ -1,28 +1,102 @@
 import { config } from "./config.js";
 import { computeStructureRisk } from "./structureRiskManager.js";
 
-// Thin wrapper around structureRiskManager's computeStructureRisk, feeding
-// it this project's config values and the candidate's precomputed 1h data
-// (candles/atr/adx, attached by scanner.js). This is now the ONLY way SL/TP
-// are determined — no manual percentage mode, no plain ATR multiplier.
+// SL/TP come from market structure (structureRiskManager.js) UNLESS you set
+// config.risk.stopLossPercent / takeProfitPercent. Each side is independent:
+//   number > 0 -> flat % distance from the entry price for that side
+//   null       -> the structure-based level (the default)
+// When BOTH are set the ratio is entirely yours, so the min/max RR gate is
+// skipped (otherwise a deliberate e.g. 2% stop / 0.5% target would be
+// rejected forever). With only one set, the other side is still
+// structure-based and the RR gate still applies.
 //
 // Returns { stopLoss, takeProfit, riskReward, isValid, reason }.
 export function computeStopTakeProfit(direction, entryPrice, candidate) {
-  const result = computeStructureRisk(
-    candidate.candles,
-    entryPrice,
-    candidate.atr,
-    candidate.adx,
-    direction,
-    config.risk.structure,
-  );
+  const slPct =
+    Number(config.risk.stopLossPercent) > 0
+      ? Number(config.risk.stopLossPercent)
+      : null;
+  const tpPct =
+    Number(config.risk.takeProfitPercent) > 0
+      ? Number(config.risk.takeProfitPercent)
+      : null;
+  const long = direction === "long";
+  const manualSL =
+    slPct != null
+      ? entryPrice * (long ? 1 - slPct / 100 : 1 + slPct / 100)
+      : null;
+  const manualTP =
+    tpPct != null
+      ? entryPrice * (long ? 1 + tpPct / 100 : 1 - tpPct / 100)
+      : null;
 
+  const structure = () =>
+    computeStructureRisk(
+      candidate.candles,
+      entryPrice,
+      candidate.atr,
+      candidate.adx,
+      direction,
+      config.risk.structure,
+    );
+
+  // Nothing set: exactly the original behaviour.
+  if (manualSL == null && manualTP == null) {
+    const r = structure();
+    return {
+      stopLoss: r.sl,
+      takeProfit: r.tp,
+      riskReward: r.rr,
+      isValid: r.isValid,
+      reason: r.reason,
+    };
+  }
+
+  let stopLoss = manualSL;
+  let takeProfit = manualTP;
+  if (manualSL == null || manualTP == null) {
+    // one side still comes from market structure
+    const r = structure();
+    if (manualSL == null) stopLoss = r.sl;
+    if (manualTP == null) takeProfit = r.tp;
+    if (stopLoss == null || takeProfit == null) {
+      return {
+        stopLoss,
+        takeProfit,
+        riskReward: 0,
+        isValid: false,
+        reason: r.reason ?? "structure level unavailable",
+      };
+    }
+  }
+
+  const risk = long ? entryPrice - stopLoss : stopLoss - entryPrice;
+  const reward = long ? takeProfit - entryPrice : entryPrice - takeProfit;
+  if (risk <= 0 || reward <= 0) {
+    return {
+      stopLoss,
+      takeProfit,
+      riskReward: 0,
+      isValid: false,
+      reason: "non-positive risk or reward",
+    };
+  }
+  const riskReward = reward / risk;
+
+  if (manualSL != null && manualTP != null) {
+    return { stopLoss, takeProfit, riskReward, isValid: true };
+  }
+
+  const { minRR, maxRR } = config.risk.structure;
+  const isValid = riskReward >= minRR && (maxRR == null || riskReward <= maxRR);
   return {
-    stopLoss: result.sl,
-    takeProfit: result.tp,
-    riskReward: result.rr,
-    isValid: result.isValid,
-    reason: result.reason,
+    stopLoss,
+    takeProfit,
+    riskReward,
+    isValid,
+    reason: isValid
+      ? undefined
+      : `RR ${riskReward.toFixed(2)} outside limits (min ${minRR}${maxRR != null ? `, max ${maxRR}` : ""})`,
   };
 }
 
