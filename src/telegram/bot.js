@@ -34,15 +34,7 @@ export class TradeTelegramBot {
         "🤖 بات گزارش ترید فعال شد.\nهر 5 دقیقه وضعیت حساب و پوزیشن‌ها ارسال می‌شود.",
       );
     });
-    this.bot.command("cancelord", async (ctx) => {
-      const orders = await this.exchange.fetchOpenOrders();
 
-      for (const order of orders) {
-        await this.exchange.cancelOrder(order.id, order.symbol);
-      }
-
-      await ctx.reply(`Cancelled ${orders.length} open orders.`);
-    });
     this.bot.command("closepos", async (ctx) => {
       const positions = await this.exchange.fetchPositions();
 
@@ -74,7 +66,7 @@ export class TradeTelegramBot {
             inline_keyboard: [
               [
                 {
-                  text: `Cancel:${item.symbol.replace(/[\/:]/g, "").replace(/USDT$/, "")}`,
+                  text: `Cancel`,
                   callback_data: `cancel:${item.symbol}:${item.orderId}`,
                 },
               ],
@@ -91,19 +83,39 @@ export class TradeTelegramBot {
       await this.exchange.cancelOrder(orderId, symbol);
       await ctx.answerCallbackQuery({ text: `Order canceled` });
     });
+    this.bot.callbackQuery(/^cancel:(.+):(.+):(.+)$/, async (ctx) => {
+      const symbol = ctx.match[1];
+      const side = ctx.match[2];
+      const amount = ctx.match[3];
+      logger.info(">>>>>>>>" + symbol);
+      await this.exchange.createOrder(
+        symbol,
+        "market",
+        side === "long" ? "sell" : "buy",
+        amount,
+        undefined,
+        { reduceOnly: true },
+      );
+    });
     this.bot.command("pos", async (ctx) => {
       const pos = await this.exchange.fetchPositions();
       if (pos.length == 0) return await ctx.reply("0 Pos");
       const result = formatPosition(pos);
       result.forEach(async (item) => {
-        await ctx.reply(item, { parse_mode: "HTML" });
+        await ctx.reply(item.text, {
+          parse_mode: "HTML",
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "Cancel",
+                  callback_data: `cancel:${item.symbol}:${item.side}:${item.amount}`,
+                },
+              ],
+            ],
+          },
+        });
       });
-      // pos.forEach(async (p, i) => {
-      //   const stringf = JSON.stringify(p);
-      //   await ctx.reply(`Position: \`\`\`\n${stringf}\n\`\`\``, {
-      //     parse_mode: "Markdown",
-      //   });
-      // });
     });
     this.bot.command("bal", async (ctx) => {
       const result = await this.exchange.fetchBalance();

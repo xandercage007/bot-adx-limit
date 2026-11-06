@@ -66,21 +66,21 @@ export function formatPortfolioSummary(summary) {
   return result;
 }
 export const formatPosition = (pos = []) => {
-  const result = [];
-  pos.forEach((item) => {
-    result.push(
-      [
-        "<b> Position </b>",
-        `Symbol: <b>${item.symbol}</b>`,
-        `Side: <b>${item.side}</b>`,
-        `EntryPrice: <b>${item.entryPrice}</b>`,
-        `UnrealizedPnL: <b>${item.unrealizedPnl}</b>`,
-        `InitialMargin: <b>${item.initialMargin}</b>`,
-        `MarkPrice: <b>${item.markPrice}</b>`,
-        `Percentage: <b>${item.percentage}</b>`,
-      ].join("\n"),
-    );
-  });
+  return pos.map((item) => ({
+    text: [
+      "<b> Position </b>",
+      `Symbol: <b>${item.symbol}</b>`,
+      `Side: <b>${item.side}</b>`,
+      `EntryPrice: <b>${item.entryPrice}</b>`,
+      `UnrealizedPnL: <b>${item.unrealizedPnl}</b>`,
+      `InitialMargin: <b>${item.initialMargin}</b>`,
+      `MarkPrice: <b>${item.markPrice}</b>`,
+      `Percentage: <b>${item.percentage}</b>`,
+    ].join("\n"),
+    symbol: item.symbol,
+    side: item.side,
+    amount: item.amount,
+  }));
 
   return result;
 };
