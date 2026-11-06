@@ -86,7 +86,7 @@ export class TradeTelegramBot {
     this.bot.callbackQuery(/^cancel:(.+)$/, async (ctx) => {
       const orderId = ctx.match[2];
 
-      logger.info("order id >>>>>>>>>>>" + ctx);
+      logger.info("order id >>>>>>>>>>>" + JSON.stringify(ctx));
 
       await this.exchange.cancelOrder(orderId);
       await ctx.answerCallbackQuery({ text: `Order canceled` });
