@@ -1,4 +1,4 @@
-import { Bot, GrammyError, HttpError } from "grammy"; // ۱. افزودن کلاس‌های خطا
+import { Bot, GrammyError, HttpError, InlineKeyboard } from "grammy"; // ۱. افزودن کلاس‌های خطا
 import { config } from "../config.js";
 // import { readPositions } from "../positionStore.js";
 import {
@@ -63,18 +63,21 @@ export class TradeTelegramBot {
       await ctx.reply("Close orders submitted.");
     });
     this.bot.command("orders", async (ctx) => {
+      const inlineKeyboard = new InlineKeyboard().text("Cancel", `cancel:`);
       const orders = await this.exchange.fetchOpenOrders();
       if (orders.length == 0) return await ctx.reply("0 ORDERS");
       const result = formatOrders(orders);
       result.forEach(async (item) => {
-        await ctx.reply(item, { parse_mode: "HTML" });
+        await ctx.reply(item, {
+          parse_mode: "HTML",
+          reply_markup: {
+            inline_keyboard: [[{ text: "Cancel", callback_data: `cancel:` }]],
+          },
+        });
       });
-      // orders.forEach(async (order) => {
-      //   const stringf = JSON.stringify(order);
-      //   await ctx.reply(`\`\`\`\n${stringf}\n\`\`\``, {
-      //     parse_mode: "Markdown",
-      //   });
-      // });
+    });
+    this.bot.callbackQuery("cancel_query", async (ctx) => {
+      await ctx.answerCallbackQuery({ text: `order canceled` });
     });
     this.bot.command("pos", async (ctx) => {
       const pos = await this.exchange.fetchPositions();
