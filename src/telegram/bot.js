@@ -87,7 +87,7 @@ export class TradeTelegramBot {
       const symbol = ctx.match[1];
       const side = ctx.match[2];
       const amount = ctx.match[3];
-      logger.info(">>>>>>>>" + symbol);
+      logger.info(">>>>>>>>" + symbol, side, amount);
       await this.exchange.createOrder(
         symbol,
         "market",
