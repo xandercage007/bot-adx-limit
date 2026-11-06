@@ -74,8 +74,8 @@ export class TradeTelegramBot {
             inline_keyboard: [
               [
                 {
-                  text: `Cancel:${item.symbol}`,
-                  callback_data: `cancel:${item.orderId}`,
+                  text: `Cancel:${item.symbol.replace(/[\/:]/g, "").replace(/USDT$/, "")}`,
+                  callback_data: `cancel:${item.symbol}:${item.orderId}`,
                 },
               ],
             ],
@@ -84,9 +84,9 @@ export class TradeTelegramBot {
       });
     });
     this.bot.callbackQuery(/^cancel:(.+)$/, async (ctx) => {
-      const orderId = ctx.match[1];
+      const orderId = ctx.match[2];
 
-      logger.info("order id >>>>>>>>>>>" + orderId);
+      logger.info("order id >>>>>>>>>>>" + ctx);
 
       await this.exchange.cancelOrder(orderId);
       await ctx.answerCallbackQuery({ text: `Order canceled` });
