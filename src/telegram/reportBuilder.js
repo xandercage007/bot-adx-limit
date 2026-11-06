@@ -94,9 +94,9 @@ export const formatOrders = (orders = []) => {
         `Side: <b>${item.info.side}</b>`,
         `EntryPrice: <b>${item.info.price}</b>`,
         `InitialMargin: <b>${item.info.marginLocked}</b>`,
-        { orderId: item.info.orderId },
       ].join("\n"),
     );
+    result.push({ orderId: item.info.orderId });
   });
 
   return result;
