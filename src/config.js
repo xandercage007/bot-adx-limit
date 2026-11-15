@@ -14,7 +14,7 @@ export const config = {
     id: "toobit",
     defaultType: "swap", // ccxt option: fetch USDT-M futures markets
     demoTrading: false, // calls exchange.enableDemoTrading(true) — Binance's official demo/paper mode
-    defaultLeverage: 10, // affects position sizing/margin only — never the SL/TP levels themselves
+    defaultLeverage: 20, // affects position sizing/margin only — never the SL/TP levels themselves
     attachRealStopOrders: true, // place STOP_MARKET / TAKE_PROFIT_MARKET orders on the exchange itself
   },
 
@@ -35,9 +35,9 @@ export const config = {
 
   // --- Macro filters: decide DIRECTION only (long/short/no-trade). ---
   timeframe: "1h",
-  candleLimit: 100,
+  candleLimit: 150,
   htTimeframe: "4h",
-  htCandleLimit: 100,
+  htCandleLimit: 150,
   scanIntervalMinutes: 5, // how often the bot re-scans for new directional candidates
 
   // --- Entry timing: a fast confirmation + limit-price layer on 5m.
@@ -46,15 +46,15 @@ export const config = {
   //     order (not market) is placed at the 5m swing support/resistance —
   //     buying a small pullback on longs, selling a small bounce on shorts
   //     — instead of chasing the current market price.
-  entryTimeframe: "5m",
+  entryTimeframe: "1m",
   entryCandleLimit: 100,
   entry: {
     pollSeconds: 20, // how often the entry-timing loop re-checks pending candidates
     maxWaitMinutes: 10, // give up on a queued candidate if it never confirms within this window
-    limitLookback: 8, // 5m candles used to find the limit-entry support/resistance (~1h of 5m data)
+    limitLookback: 16, // 5m candles used to find the limit-entry support/resistance (~1h of 5m data)
     limitFillTimeoutMinutes: 240, // cancel the limit entry order if it never fills within this window
     limitPollSeconds: 15, // how often to check whether a placed limit order has filled
-    maxLimitDistancePercent: 1, // limit order
+    maxLimitDistancePercent: 1.5, // limit order
   },
 
   risk: {
@@ -62,8 +62,8 @@ export const config = {
     riskPerTradePercent: 1, // % of balance risked per trade — only used if fixedMarginPerTradeUSDT is null
     maxMarginPercentPerTrade: 0.2, // fallback cap as % of balance — only used if fixedMarginPerTradeUSDT is null
     fixedMarginPerTradeUSDT: 10, // if set, every trade uses exactly this much margin (USDT), ignoring the % settings above
-    maxOpenPositions: 4,
-    maxLeverage: 10,
+    maxOpenPositions: 2,
+    maxLeverage: 20,
 
     // --- Structure-based SL/TP (src/structureRiskManager.js) ---
     // Stop-loss: swing low/high (over `slLookback` 1h candles) plus a
@@ -119,7 +119,7 @@ export const config = {
     // If BOTH are numbers, the min/max RR gate above is skipped, since the
     // ratio is entirely your choice; with only one set, the other side is
     // still structure-based and the RR gate still applies.
-    stopLossPercent: 1.5, // e.g. 1.5 => SL 1.5% from entry
+    stopLossPercent: 5, // e.g. 1.5 => SL 1.5% from entry
     takeProfitPercent: null, // e.g. 1.0 => TP 1.0% from entry
 
     // --- Pin bar (hammer / shooting star) check on the last closed 1h candles ---
@@ -133,8 +133,8 @@ export const config = {
       //   "block" = just skip the symbol.
       onConflict: "flip",
       recentCandles: 2, // the pin bar may be on any of the last N closed candles
-      minWickRatio: 0.6, // the long wick must be >= 60% of the candle's full range
-      maxOppositeWickRatio: 0.25, // ...and the opposite wick <= 25% of it
+      minWickRatio: 0.5, // the long wick must be >= 60% of the candle's full range
+      maxOppositeWickRatio: 0.18, // ...and the opposite wick <= 25% of it
       minRangeAtr: 0.8, // ignore small candles: range must be >= 0.8 x ATR
       requireAtExtreme: true, // must print a new low (bullish) / high (bearish) vs the previous candles
       extremeLookback: 20,

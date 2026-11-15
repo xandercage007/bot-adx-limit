@@ -140,6 +140,7 @@ export class TradeTelegramBot {
     this.bot.command("ping", async (ctx) => {
       await ctx.reply("pong");
     });
+
     await this.bot.api.setMyCommands([
       {
         command: "status",
@@ -159,6 +160,7 @@ export class TradeTelegramBot {
       },
       { command: "closepos", description: "close all positions" },
       { command: "cancelord", description: "cancel all orders" },
+      { command: "openpos", description: "Open custom position" },
     ]);
     this.bot.catch((err) => {
       const ctx = err.ctx;
