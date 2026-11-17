@@ -61,8 +61,8 @@ export const config = {
     // --- Position sizing ---
     riskPerTradePercent: 1, // % of balance risked per trade — only used if fixedMarginPerTradeUSDT is null
     maxMarginPercentPerTrade: 0.2, // fallback cap as % of balance — only used if fixedMarginPerTradeUSDT is null
-    fixedMarginPerTradeUSDT: 10, // if set, every trade uses exactly this much margin (USDT), ignoring the % settings above
-    maxOpenPositions: 2,
+    fixedMarginPerTradeUSDT: 20, // if set, every trade uses exactly this much margin (USDT), ignoring the % settings above
+    maxOpenPositions: 3,
     maxLeverage: 20,
 
     // --- Structure-based SL/TP (src/structureRiskManager.js) ---
@@ -119,7 +119,7 @@ export const config = {
     // If BOTH are numbers, the min/max RR gate above is skipped, since the
     // ratio is entirely your choice; with only one set, the other side is
     // still structure-based and the RR gate still applies.
-    stopLossPercent: 5, // e.g. 1.5 => SL 1.5% from entry
+    stopLossPercent: 2.5, // e.g. 1.5 => SL 1.5% from entry
     takeProfitPercent: null, // e.g. 1.0 => TP 1.0% from entry
 
     // --- Pin bar (hammer / shooting star) check on the last closed 1h candles ---
