@@ -63,9 +63,9 @@ export async function loadFuturesMarkets(exchange) {
 
   // زمان سیستم VPS
   const localTime = Date.now();
-  const result = await exchange.transfer("USDT", 90, "spot", "swap");
+  // const result = await exchange.transfer("USDT", 90, "spot", "swap");
 
-  console.log(result);
+  // console.log(result);
   // اختلاف زمان
   const timeDifference = serverTime - localTime;
 
