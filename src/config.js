@@ -12,7 +12,7 @@ export const config = {
 
   exchange: {
     id: "toobit",
-    defaultType: "swap", // ccxt option: fetch USDT-M futures markets
+    defaultType: "spot", // ccxt option: fetch USDT-M futures markets
     demoTrading: false, // calls exchange.enableDemoTrading(true) — Binance's official demo/paper mode
     defaultLeverage: 20, // affects position sizing/margin only — never the SL/TP levels themselves
     attachRealStopOrders: true, // place STOP_MARKET / TAKE_PROFIT_MARKET orders on the exchange itself
