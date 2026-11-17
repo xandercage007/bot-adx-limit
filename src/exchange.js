@@ -63,15 +63,8 @@ export async function loadFuturesMarkets(exchange) {
 
   // زمان سیستم VPS
   const localTime = Date.now();
-  const transfers = await exchange.privateGetV1AccountBalanceFlow({
-    coin: "USDT",
-    flowType: 51,
-    startTime: Date.now() - 7 * 24 * 60 * 60 * 1000,
-    endTime: Date.now(),
-    limit: 100,
-  });
-
-  logger.info(">>>>>>>>>>>w" + JSON.stringify(transfers));
+  const orders = await exchange.fetchClosedOrders();
+  logger.info(`>>>>> ${JSON.stringify(orders)} <<<<<`);
   // اختلاف زمان
   const timeDifference = serverTime - localTime;
 
