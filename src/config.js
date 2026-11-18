@@ -35,9 +35,9 @@ export const config = {
 
   // --- Macro filters: decide DIRECTION only (long/short/no-trade). ---
   timeframe: "1h",
-  candleLimit: 150,
+  candleLimit: 100,
   htTimeframe: "4h",
-  htCandleLimit: 150,
+  htCandleLimit: 100,
   scanIntervalMinutes: 5, // how often the bot re-scans for new directional candidates
 
   // --- Entry timing: a fast confirmation + limit-price layer on 5m.
