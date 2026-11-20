@@ -61,7 +61,7 @@ export const config = {
     // --- Position sizing ---
     riskPerTradePercent: 1, // % of balance risked per trade — only used if fixedMarginPerTradeUSDT is null
     maxMarginPercentPerTrade: 0.2, // fallback cap as % of balance — only used if fixedMarginPerTradeUSDT is null
-    fixedMarginPerTradeUSDT: 15, // if set, every trade uses exactly this much margin (USDT), ignoring the % settings above
+    fixedMarginPerTradeUSDT: 20, // if set, every trade uses exactly this much margin (USDT), ignoring the % settings above
     maxOpenPositions: 3,
     maxLeverage: 10,
 
