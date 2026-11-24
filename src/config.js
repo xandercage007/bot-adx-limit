@@ -21,7 +21,7 @@ export const config = {
   // How many top-volume USDT-margined perpetuals to scan each cycle
   universe: {
     quote: "USDT",
-    topN: 200,
+    topN: 100,
     excludeSymbols: [
       "1000WHY/USDT:USDT",
       "FXS/USDT:USDT",
@@ -35,9 +35,9 @@ export const config = {
 
   // --- Macro filters: decide DIRECTION only (long/short/no-trade). ---
   timeframe: "1h",
-  candleLimit: 100,
+  candleLimit: 200,
   htTimeframe: "4h",
-  htCandleLimit: 100,
+  htCandleLimit: 200,
   scanIntervalMinutes: 5, // how often the bot re-scans for new directional candidates
 
   // --- Entry timing: a fast confirmation + limit-price layer on 5m.
@@ -46,8 +46,8 @@ export const config = {
   //     order (not market) is placed at the 5m swing support/resistance —
   //     buying a small pullback on longs, selling a small bounce on shorts
   //     — instead of chasing the current market price.
-  entryTimeframe: "15m",
-  entryCandleLimit: 100,
+  entryTimeframe: "5m",
+  entryCandleLimit: 200,
   entry: {
     pollSeconds: 10, // how often the entry-timing loop re-checks pending candidates
     maxWaitMinutes: 20, // give up on a queued candidate if it never confirms within this window
@@ -61,7 +61,7 @@ export const config = {
     // --- Position sizing ---
     riskPerTradePercent: 1, // % of balance risked per trade — only used if fixedMarginPerTradeUSDT is null
     maxMarginPercentPerTrade: 0.2, // fallback cap as % of balance — only used if fixedMarginPerTradeUSDT is null
-    fixedMarginPerTradeUSDT: 11, // if set, every trade uses exactly this much margin (USDT), ignoring the % settings above
+    fixedMarginPerTradeUSDT: 10, // if set, every trade uses exactly this much margin (USDT), ignoring the % settings above
     maxOpenPositions: 4,
     maxLeverage: 10,
 
@@ -81,7 +81,7 @@ export const config = {
       minRR: 0.6, // reject the trade outright below this
       maxRR: null, // no upper cap by default — set a number to re-enable one
       adxTrendThreshold: 20, // below this, market is considered choppy/sideways
-      tpFractionTrending: 0.65, // % of distance to the swing level, when ADX is healthy
+      tpFractionTrending: 0.8, // % of distance to the swing level, when ADX is healthy
       tpFractionChoppy: 0.65, // tighter target when ADX < adxTrendThreshold
     },
 
@@ -133,11 +133,11 @@ export const config = {
       //   "block" = just skip the symbol.
       onConflict: "flip",
       recentCandles: 2, // the pin bar may be on any of the last N closed candles
-      minWickRatio: 0.5, // the long wick must be >= 60% of the candle's full range
+      minWickRatio: 0.4, // the long wick must be >= 60% of the candle's full range
       maxOppositeWickRatio: 0.18, // ...and the opposite wick <= 25% of it
-      minRangeAtr: 0.8, // ignore small candles: range must be >= 0.8 x ATR
+      minRangeAtr: 0.5, // ignore small candles: range must be >= 0.8 x ATR
       requireAtExtreme: true, // must print a new low (bullish) / high (bearish) vs the previous candles
-      extremeLookback: 20,
+      extremeLookback: 15,
     },
   },
 
